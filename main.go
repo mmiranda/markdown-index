@@ -14,8 +14,10 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
+var ignoreDirectories []string
+
 func main() {
-	// fmt.Println("Hello, world.")
+
 	content := buildIndexContent(".")
 
 	createMDFile("toc-index.md", content)
@@ -26,17 +28,29 @@ func findFiles(root string) []string {
 	var files []string
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if filepath.Ext(path) != ".md" {
+		// Ignoring pre-defined directories and files that are not .md
+		if filepath.Ext(path) != ".md" || contains(ignoreDirectories, filepath.Base(filepath.Dir(path))) {
 			return nil
 		}
 
 		files = append(files, path)
 		return nil
 	})
+
 	if err != nil {
 		panic(err)
 	}
 	return files
+}
+
+// contains verify if a string is inside a set of strings
+func contains(slice []string, searchterm string) bool {
+	for _, value := range slice {
+		if value == searchterm {
+			return true
+		}
+	}
+	return false
 }
 
 // readFile Reads a markdown file and return its content
