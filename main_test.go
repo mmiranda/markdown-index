@@ -12,12 +12,12 @@ import (
 )
 
 func TestShouldFindReadme(t *testing.T) {
-	files := findFiles("./test")
+	files := findFiles("./test", []string{})
 	assert.Equal(t, 4, len(files))
 }
 
 func TestShouldReadFileContent(t *testing.T) {
-	files := findFiles("./test")
+	files := findFiles("./test", []string{})
 
 	content := readFile(files[0])
 
@@ -25,7 +25,7 @@ func TestShouldReadFileContent(t *testing.T) {
 }
 
 func TestGetFirstParagraph(t *testing.T) {
-	files := findFiles("./test")
+	files := findFiles("./test", []string{})
 
 	title := getFirstParagraph(files[0]).title
 	content := getFirstParagraph(files[0]).content
@@ -35,7 +35,7 @@ func TestGetFirstParagraph(t *testing.T) {
 }
 
 func TestGetFirstParagraphInEveryFile(t *testing.T) {
-	files := findFiles("./test")
+	files := findFiles("./test", []string{})
 
 	for key, _ := range files {
 		// fmt.Println(key)
@@ -86,28 +86,36 @@ func deleteFile(filePath string) {
 
 func TestCompareFinalFileContent(t *testing.T) {
 	mockFilePath := "test/mock-toc-toc.mock"
-	contentString := buildIndexContent("test")
+	contentString := buildIndexContent("./test", []string{})
 
 	mockFile := readFile(mockFilePath)
 
 	assert.Equal(t, string(mockFile), strings.Join(contentString[:], ""))
+}
 
+func TestCompareFinalFileContentWithIgnore(t *testing.T) {
+	mockFilePath := "test/mock-toc-toc-ignored.mock"
+
+	contentString := buildIndexContent("./test", []string{"folder2"})
+
+	mockFile := readFile(mockFilePath)
+
+	assert.Equal(t, string(mockFile), strings.Join(contentString[:], ""))
 }
 
 func TestCompareFinalFileBytes(t *testing.T) {
 	filePath := "/tmp/test-toc.md"
-	contentString := buildIndexContent("test")
+	contentString := buildIndexContent("./test", []string{})
 	createMDFile(filePath, contentString)
-	file1 := readFile(filePath)
+	fileGenerated := readFile(filePath)
 
-	mockFile := readFile("test/mock-toc-toc.mock")
-
-	assert.True(t, bytes.Equal(file1, mockFile))
+	mockFile := readFile("./test/mock-toc-toc.mock")
+	assert.True(t, bytes.Equal(fileGenerated, mockFile))
 
 	deleteFile(filePath)
 }
 
-func TestFilterAbstract(t *testing.T) {
+func TestFilterAbstractHeading(t *testing.T) {
 
 	content := FilterHeadingAbstract("Another title", "test/README.md")
 	assert.NotEmpty(t, content)

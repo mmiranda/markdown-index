@@ -18,13 +18,13 @@ var ignoreDirectories []string
 
 func main() {
 
-	content := buildIndexContent(".")
+	content := buildIndexContent(".", ignoreDirectories)
 
 	createMDFile("toc-index.md", content)
 }
 
 // findFiles looks for files recursively
-func findFiles(root string) []string {
+func findFiles(root string, ignoreDirectories []string) []string {
 	var files []string
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -136,12 +136,12 @@ func createMDFile(filePath string, content []string) {
 }
 
 //builds the content of the final file
-func buildIndexContent(sourcePath string) []string {
+func buildIndexContent(sourcePath string, ignoreDirectories []string) []string {
 
 	// var files string
 	var files, content []string
 
-	files = findFiles(sourcePath)
+	files = findFiles(sourcePath, ignoreDirectories)
 
 	for key, _ := range files {
 		content = append(content, getFirstParagraph(files[key]).title)
