@@ -22,3 +22,9 @@
 
 [Read more on the original file...](test/folder2/README.md)
 
+# Abstract
+
+[4] This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
+
+[Read more on the original file...](test/with-abstract/README.md)
+

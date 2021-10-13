@@ -13,7 +13,7 @@ import (
 
 func TestShouldFindReadme(t *testing.T) {
 	files := findFiles("./test", []string{})
-	assert.Equal(t, 4, len(files))
+	assert.Equal(t, 5, len(files))
 }
 
 func TestShouldReadFileContent(t *testing.T) {

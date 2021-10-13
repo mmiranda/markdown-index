@@ -66,15 +66,21 @@ func readFile(file string) []byte {
 }
 
 // getFirstParagraph gets the text of first paragraph in a markdown file
-func getFirstParagraph(file string) abstractParagraph {
+func getFirstParagraph(file string) AbstractParagraph {
 
 	doc, source := ParseDocument(file)
-	// FilterHeadingAbstract("Another title", file)
+
+	if paragraph := FilterHeadingAbstract("Abstract", file); (paragraph != AbstractParagraph{}) {
+		return AbstractParagraph{
+			"# " + paragraph.title,
+			paragraph.content,
+		}
+	}
 
 	title := "# " + string(doc.FirstChild().Text(source))
 	content := string(doc.FirstChild().NextSibling().Text(source))
 
-	return abstractParagraph{
+	return AbstractParagraph{
 		title,
 		content,
 	}
@@ -91,8 +97,8 @@ func ParseDocument(filePath string) (ast.Node, []byte) {
 	return gm.Parser().Parse(text.NewReader(source)), source
 }
 
-func FilterHeadingAbstract(title string, filePath string) abstractParagraph {
-	var content abstractParagraph
+func FilterHeadingAbstract(title string, filePath string) AbstractParagraph {
+	var content AbstractParagraph
 
 	doc, source := ParseDocument(filePath)
 	ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -100,7 +106,7 @@ func FilterHeadingAbstract(title string, filePath string) abstractParagraph {
 		var err error
 
 		if n.Kind().String() == "Heading" && string(n.Text(source)) == title {
-			content = abstractParagraph{
+			content = AbstractParagraph{
 				string(n.Text(source)),
 				string(n.NextSibling().Text(source)),
 			}
@@ -112,8 +118,8 @@ func FilterHeadingAbstract(title string, filePath string) abstractParagraph {
 	return content
 }
 
-//abstractParagraph represents the paragraph which will be used as abstract.
-type abstractParagraph struct {
+//AbstractParagraph represents the paragraph which will be used as abstract.
+type AbstractParagraph struct {
 	title   string
 	content string
 }
