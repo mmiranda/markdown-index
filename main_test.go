@@ -115,3 +115,10 @@ func TestFilterAbstract(t *testing.T) {
 	content = FilterHeadingAbstract("Unexistent title heading", "test/README.md")
 	assert.Empty(t, content)
 }
+
+func TestContainsHelper(t *testing.T) {
+	directories := []string{"A", "B"}
+
+	assert.True(t, contains(directories, "A"))
+	assert.False(t, contains(directories, "C"))
+}
