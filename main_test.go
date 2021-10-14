@@ -27,7 +27,7 @@ func TestShouldReadFileContent(t *testing.T) {
 func TestGetFirstParagraph(t *testing.T) {
 	files := findFiles("./test", []string{})
 
-	title := getFirstParagraph(files[0]).title
+	title := "# " + getFirstParagraph(files[0]).title
 	content := getFirstParagraph(files[0]).content
 
 	assert.Equal(t, "[0] This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
@@ -38,8 +38,6 @@ func TestGetFirstParagraphInEveryFile(t *testing.T) {
 	files := findFiles("./test", []string{})
 
 	for key, _ := range files {
-		// fmt.Println(key)
-		// fmt.Println(file)
 		content := getFirstParagraph(files[key]).content
 		assert.Equal(t, fmt.Sprintf("[%s] This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", strconv.Itoa(key)), content)
 	}

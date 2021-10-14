@@ -72,17 +72,14 @@ func getFirstParagraph(file string) AbstractParagraph {
 
 	if paragraph := FilterHeadingAbstract("Abstract", file); (paragraph != AbstractParagraph{}) {
 		return AbstractParagraph{
-			"# " + paragraph.title,
+			paragraph.title,
 			paragraph.content,
 		}
 	}
 
-	title := "# " + string(doc.FirstChild().Text(source))
-	content := string(doc.FirstChild().NextSibling().Text(source))
-
 	return AbstractParagraph{
-		title,
-		content,
+		string(doc.FirstChild().Text(source)),
+		string(doc.FirstChild().NextSibling().Text(source)),
 	}
 }
 
@@ -150,7 +147,7 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) []string {
 	files = findFiles(sourcePath, ignoreDirectories)
 
 	for key, _ := range files {
-		content = append(content, getFirstParagraph(files[key]).title)
+		content = append(content, "# "+getFirstParagraph(files[key]).title)
 		content = append(content, "\n\n")
 		content = append(content, getFirstParagraph(files[key]).content)
 		content = append(content, "\n\n")
