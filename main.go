@@ -2,12 +2,14 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 
+	mdrender "github.com/Kunde21/markdownfmt/v2/markdown"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
@@ -18,9 +20,9 @@ var ignoreDirectories []string
 
 func main() {
 
-	content := buildIndexContent(".", ignoreDirectories)
+	contentDocument := buildIndexContent(".", ignoreDirectories)
 
-	createMDFile("toc-index.md", content)
+	createMDFile("toc-index.md", renderPlainMarkdown(contentDocument))
 }
 
 // findFiles looks for files recursively
@@ -98,6 +100,7 @@ func FilterHeadingAbstract(title string, filePath string) AbstractParagraph {
 	var content AbstractParagraph
 
 	doc, source := ParseDocument(filePath)
+
 	ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		s := ast.WalkStatus(ast.WalkContinue)
 		var err error
@@ -121,7 +124,7 @@ type AbstractParagraph struct {
 	content string
 }
 
-func createMDFile(filePath string, content []string) {
+func createMDFile(filePath string, content string) {
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
@@ -130,30 +133,53 @@ func createMDFile(filePath string, content []string) {
 
 	datawriter := bufio.NewWriter(file)
 
-	for _, data := range content {
-		_, _ = datawriter.WriteString(data)
-	}
+	datawriter.WriteString(content)
 
 	datawriter.Flush()
 	file.Close()
 }
 
-//builds the content of the final file
-func buildIndexContent(sourcePath string, ignoreDirectories []string) []string {
+func buildIndexContent(sourcePath string, ignoreDirectories []string) ast.Node {
 
-	// var files string
-	var files, content []string
-
-	files = findFiles(sourcePath, ignoreDirectories)
-
+	files := findFiles(sourcePath, ignoreDirectories)
+	finalDoc := ast.NewDocument()
 	for key, _ := range files {
-		content = append(content, "# "+getFirstParagraph(files[key]).title)
-		content = append(content, "\n\n")
-		content = append(content, getFirstParagraph(files[key]).content)
-		content = append(content, "\n\n")
-		content = append(content, "[Read more on the original file...]("+files[key]+")")
-		content = append(content, "\n\n")
+		heading := ast.NewHeading(1)
+
+		paragraph := ast.NewParagraph()
+
+		heading.AppendChild(heading, ast.NewString([]byte(getFirstParagraph(files[key]).title)))
+
+		paragraphContent := getFirstParagraph(files[key]).content + "\n\n[Read more on the original file...](" + files[key] + ")"
+		paragraph.AppendChild(paragraph, ast.NewString([]byte(paragraphContent)))
+
+		finalDoc.AppendChild(finalDoc, heading)
+		finalDoc.AppendChild(finalDoc, paragraph)
+
 	}
 
-	return content
+	return finalDoc
+}
+
+func renderHTMLMarkdown(document ast.Node) string {
+	var (
+		content []byte
+		buffer  bytes.Buffer
+	)
+	gm := goldmark.New()
+
+	_ = gm.Renderer().Render(&buffer, content, document)
+
+	return buffer.String()
+}
+
+func renderPlainMarkdown(document ast.Node) string {
+	var (
+		content []byte
+		buffer  bytes.Buffer
+	)
+	mdrender := mdrender.NewRenderer()
+	mdrender.Render(&buffer, content, document)
+
+	return buffer.String()
 }

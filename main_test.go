@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,31 +46,28 @@ func TestGetFirstParagraphInEveryFile(t *testing.T) {
 
 func TestCreateSingleLineFile(t *testing.T) {
 	filePath := "/tmp/test.md"
-	contentString := []string{"# Hello, this is a test"}
+	contentString := "# Hello, this is a test"
 	// contentString = append(contentString, "\nMultiline test")
 	createMDFile(filePath, contentString)
 	assert.FileExists(t, filePath)
 
 	content := readFile(filePath)
 
-	assert.Equal(t, strings.Join(contentString[:], ""), string(content))
+	assert.Equal(t, contentString, string(content))
 
 	deleteFile(filePath)
 }
 
 func TestCreateMultiLineFile(t *testing.T) {
 	filePath := "/tmp/test.md"
-	contentString := []string{
-		"# Hello, this is a test",
-		"\n",
-		"This is a sample text",
-	}
+	contentString := "# Hello, this is a test\nThis is a sample text"
+
 	createMDFile(filePath, contentString)
 	assert.FileExists(t, filePath)
 
 	content := readFile(filePath)
 
-	assert.Equal(t, strings.Join(contentString[:], ""), string(content))
+	assert.Equal(t, contentString, string(content))
 	deleteFile(filePath)
 }
 
@@ -82,32 +78,64 @@ func deleteFile(filePath string) {
 	}
 }
 
-func TestCompareFinalFileContent(t *testing.T) {
+func TestCompareFinalFilePlainContent(t *testing.T) {
 	mockFilePath := "test/mock-toc-toc.mock"
+	// contentString := buildIndexContent("./test", []string{})
 	contentString := buildIndexContent("./test", []string{})
 
 	mockFile := readFile(mockFilePath)
 
-	assert.Equal(t, string(mockFile), strings.Join(contentString[:], ""))
+	assert.Equal(t, string(mockFile), renderPlainMarkdown(contentString))
 }
 
-func TestCompareFinalFileContentWithIgnore(t *testing.T) {
+func TestCompareFinalFileHTMLContent(t *testing.T) {
+	mockFilePath := "test/mock-toc-toc-html.mock"
+	// contentString := buildIndexContent("./test", []string{})
+	contentString := buildIndexContent("./test", []string{})
+
+	mockFile := readFile(mockFilePath)
+
+	assert.Equal(t, string(mockFile), renderHTMLMarkdown(contentString))
+}
+
+func TestCompareFinalFilePlainContentWithIgnore(t *testing.T) {
 	mockFilePath := "test/mock-toc-toc-ignored.mock"
 
 	contentString := buildIndexContent("./test", []string{"folder2"})
 
 	mockFile := readFile(mockFilePath)
 
-	assert.Equal(t, string(mockFile), strings.Join(contentString[:], ""))
+	assert.Equal(t, string(mockFile), renderPlainMarkdown(contentString))
 }
 
-func TestCompareFinalFileBytes(t *testing.T) {
+func TestCompareFinalFileHTMLContentWithIgnore(t *testing.T) {
+	mockFilePath := "test/mock-toc-toc-html-ignored.mock"
+
+	contentString := buildIndexContent("./test", []string{"folder2"})
+
+	mockFile := readFile(mockFilePath)
+
+	assert.Equal(t, string(mockFile), renderHTMLMarkdown(contentString))
+}
+func TestCompareFinalFilePlainBytes(t *testing.T) {
 	filePath := "/tmp/test-toc.md"
-	contentString := buildIndexContent("./test", []string{})
-	createMDFile(filePath, contentString)
+	contentDocument := buildIndexContent("./test", []string{})
+	createMDFile(filePath, renderPlainMarkdown(contentDocument))
 	fileGenerated := readFile(filePath)
 
 	mockFile := readFile("./test/mock-toc-toc.mock")
+	assert.True(t, bytes.Equal(fileGenerated, mockFile))
+
+	deleteFile(filePath)
+}
+
+func TestCompareFinalFileHTMLBytes(t *testing.T) {
+	filePath := "/tmp/test-toc.md"
+	contentDocument := buildIndexContent("./test", []string{})
+	createMDFile(filePath, renderHTMLMarkdown(contentDocument))
+	fileGenerated := readFile(filePath)
+
+	mockFile := readFile("./test/mock-toc-toc-html.mock")
 	assert.True(t, bytes.Equal(fileGenerated, mockFile))
 
 	deleteFile(filePath)
