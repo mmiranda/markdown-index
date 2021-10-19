@@ -1,6 +1,6 @@
 <ul>
 <li>
-Root Level Markdown</li>
+Root Level Markdown<ul>
 <li>
 Level 1 Markdown<ul>
 <li>
@@ -9,24 +9,28 @@ Level 1.1 Markdown</li>
 </li>
 <li>
 Level 2 Markdown</li>
+</ul>
+</li>
 <li>
-this file has a single line</li>
+this file has a single line<ul>
 <li>
 Abstract</li>
+</ul>
+</li>
 </ul>
 <h1>Root Level Markdown</h1>
 <p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
 [Read more on the original file...](test/README.md)</p>
-<h1>Level 1 Markdown</h1>
+<h2>Level 1 Markdown</h2>
 <p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
 [Read more on the original file...](test/folder1/README.md)</p>
-<h2>Level 1.1 Markdown</h2>
+<h3>Level 1.1 Markdown</h3>
 <p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
 [Read more on the original file...](test/folder1/folder11/README.md)</p>
-<h1>Level 2 Markdown</h1>
+<h2>Level 2 Markdown</h2>
 <p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
 [Read more on the original file...](test/folder2/README.md)</p>
@@ -34,7 +38,7 @@ Abstract</li>
 <p>
 
 [Read more on the original file...](test/single-line.md)</p>
-<h1>Abstract</h1>
+<h2>Abstract</h2>
 <p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
 [Read more on the original file...](test/with-abstract/README.md)</p>

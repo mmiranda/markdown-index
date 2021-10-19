@@ -22,7 +22,7 @@ var ignoreDirectories []string
 
 func main() {
 
-	contentDocument := buildIndexContent("./", ignoreDirectories)
+	contentDocument := buildIndexContent(".", ignoreDirectories)
 
 	createMDFile("toc-index.md", renderPlainMarkdown(contentDocument))
 }
@@ -57,20 +57,10 @@ func contains(slice []string, searchterm string) bool {
 	return false
 }
 
-// calculatePathDepth return s the depth of a folder structure
+// calculatePathDepth returns the depth of a folder structure
 func calculatePathDepth(path string) int {
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		log.Fatalf("An error occured: %s", err)
-	}
 
-	depth := strings.Count(path, "/")
-	if fileInfo.IsDir() || depth == 1 {
-		return depth
-	}
-
-	return depth - 1
-
+	return strings.Count(path, "/")
 }
 
 // readFile Reads a markdown file and return its content

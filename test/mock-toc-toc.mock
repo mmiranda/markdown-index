@@ -1,9 +1,9 @@
 * Root Level Markdown
-* Level 1 Markdown
-  * Level 1.1 Markdown
-* Level 2 Markdown
+  * Level 1 Markdown
+    * Level 1.1 Markdown
+  * Level 2 Markdown
 * this file has a single line
-* Abstract
+  * Abstract
 
 # Root Level Markdown
 
@@ -11,19 +11,19 @@ This is a sample paragraph text for test purpose only. This paragraph will be us
 
 [Read more on the original file...](test/README.md)
 
-# Level 1 Markdown
+## Level 1 Markdown
 
 This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
 [Read more on the original file...](test/folder1/README.md)
 
-## Level 1.1 Markdown
+### Level 1.1 Markdown
 
 This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
 [Read more on the original file...](test/folder1/folder11/README.md)
 
-# Level 2 Markdown
+## Level 2 Markdown
 
 This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
@@ -35,7 +35,7 @@ This is a sample paragraph text for test purpose only. This paragraph will be us
 
 [Read more on the original file...](test/single-line.md)
 
-# Abstract
+## Abstract
 
 This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 

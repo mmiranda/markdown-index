@@ -159,21 +159,10 @@ func TestContainsHelper(t *testing.T) {
 }
 
 func TestCalculateDepth(t *testing.T) {
-	os.MkdirAll("/tmp/markdown-index/docs/test", os.ModePerm)
 
-	assert.Equal(t, 1, calculatePathDepth("/tmp"))
-	createMDFile("/tmp/file.md", "sample")
-	assert.Equal(t, 1, calculatePathDepth("/tmp/file.md"))
-	assert.Equal(t, 2, calculatePathDepth("/tmp/markdown-index"))
-	createMDFile("/tmp/markdown-index/test.file", "sample")
-	assert.Equal(t, 2, calculatePathDepth("/tmp/markdown-index/test.file"))
-	assert.Equal(t, 3, calculatePathDepth("/tmp/markdown-index/docs"))
-	createMDFile("/tmp/markdown-index/docs/readme.md", "sample")
-	assert.Equal(t, 3, calculatePathDepth("/tmp/markdown-index/docs/readme.md"))
-	assert.Equal(t, 4, calculatePathDepth("/tmp/markdown-index/docs/test"))
-	assert.Equal(t, 1, calculatePathDepth("./"))
 	assert.Equal(t, 1, calculatePathDepth("test/README.md"))
-
-	os.RemoveAll("/tmp/markdown-index")
+	assert.Equal(t, 2, calculatePathDepth("test/folder1/README.md"))
+	assert.Equal(t, 3, calculatePathDepth("test/folder1/folder11/README.md"))
+	assert.Equal(t, 2, calculatePathDepth("test/folder2/README.md"))
 
 }
