@@ -172,7 +172,7 @@ func TestCalculateDepth(t *testing.T) {
 	assert.Equal(t, 3, calculatePathDepth("/tmp/markdown-index/docs/readme.md"))
 	assert.Equal(t, 4, calculatePathDepth("/tmp/markdown-index/docs/test"))
 	assert.Equal(t, 1, calculatePathDepth("./"))
-	assert.Equal(t, 1, calculatePathDepth("test/readme.md"))
+	assert.Equal(t, 1, calculatePathDepth("test/README.md"))
 
 	os.RemoveAll("/tmp/markdown-index")
 
