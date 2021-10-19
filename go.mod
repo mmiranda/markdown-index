@@ -9,6 +9,7 @@ require (
 	github.com/Kunde21/markdownfmt v0.1.6 // indirect
 	github.com/Kunde21/markdownfmt/v2 v2.1.0 // indirect
 	github.com/PuerkitoBio/goquery v1.5.1 // indirect
+	github.com/abhinav/goldmark-toc v0.2.0
 	github.com/andybalholm/cascadia v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect

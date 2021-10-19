@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	mdrender "github.com/Kunde21/markdownfmt/v2/markdown"
+	toc "github.com/abhinav/goldmark-toc"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
@@ -201,18 +202,34 @@ func renderHTMLMarkdown(document ast.Node) string {
 	if err != nil {
 		log.Fatalf("An error occured: %s", err)
 	}
-
+	buffer = prepareTableOfContents(document)
 	return buffer.String()
 }
 
-func renderPlainMarkdown(document ast.Node) string {
-	var (
-		content []byte
-		buffer  bytes.Buffer
-	)
-	mdrender := mdrender.NewRenderer()
-	err := mdrender.Render(&buffer, content, document)
+func prepareTableOfContents(document ast.Node) bytes.Buffer {
+	tree, err := toc.Inspect(document, []byte(""))
+	if err != nil {
+		log.Fatalf("An error occured: %s", err)
+	}
 
+	list := toc.RenderList(tree)
+	var output bytes.Buffer
+
+	document.InsertBefore(document, document.FirstChild(), list)
+
+	// Render the document as output.
+	gm := goldmark.New()
+	gm.Renderer().Render(&output, []byte(""), document)
+
+	return output
+}
+
+func renderPlainMarkdown(document ast.Node) string {
+	var buffer bytes.Buffer
+
+	bufferHtml := prepareTableOfContents(document)
+	mdrender := mdrender.NewRenderer()
+	err := mdrender.Render(&buffer, bufferHtml.Bytes(), document)
 	if err != nil {
 		log.Fatalf("An error occured: %s", err)
 	}
