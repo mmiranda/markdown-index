@@ -2,9 +2,7 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"os"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,7 +10,7 @@ import (
 
 func TestShouldFindReadme(t *testing.T) {
 	files := findFiles("./test", []string{})
-	assert.Equal(t, 5, len(files))
+	assert.Equal(t, 6, len(files))
 }
 
 func TestShouldReadFileContent(t *testing.T) {
@@ -29,7 +27,7 @@ func TestGetFirstParagraph(t *testing.T) {
 	title := "# " + getFirstParagraph(files[0]).title
 	content := getFirstParagraph(files[0]).content
 
-	assert.Equal(t, "[0] This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
+	assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
 	assert.Equal(t, "# Root Level Markdown", title)
 }
 
@@ -38,7 +36,12 @@ func TestGetFirstParagraphInEveryFile(t *testing.T) {
 
 	for key, _ := range files {
 		content := getFirstParagraph(files[key]).content
-		assert.Equal(t, fmt.Sprintf("[%s] This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", strconv.Itoa(key)), content)
+		if len(content) > 0 {
+			assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
+		} else {
+			assert.Equal(t, "", content)
+		}
+
 	}
 
 	assert.True(t, true)
@@ -80,7 +83,6 @@ func deleteFile(filePath string) {
 
 func TestCompareFinalFilePlainContent(t *testing.T) {
 	mockFilePath := "test/mock-toc-toc.mock"
-	// contentString := buildIndexContent("./test", []string{})
 	contentString := buildIndexContent("./test", []string{})
 
 	mockFile := readFile(mockFilePath)
@@ -90,7 +92,6 @@ func TestCompareFinalFilePlainContent(t *testing.T) {
 
 func TestCompareFinalFileHTMLContent(t *testing.T) {
 	mockFilePath := "test/mock-toc-toc-html.mock"
-	// contentString := buildIndexContent("./test", []string{})
 	contentString := buildIndexContent("./test", []string{})
 
 	mockFile := readFile(mockFilePath)
@@ -155,4 +156,24 @@ func TestContainsHelper(t *testing.T) {
 
 	assert.True(t, contains(directories, "A"))
 	assert.False(t, contains(directories, "C"))
+}
+
+func TestCalculateDepth(t *testing.T) {
+	os.MkdirAll("/tmp/markdown-index/docs/test", os.ModePerm)
+
+	assert.Equal(t, 1, calculatePathDepth("/tmp"))
+	createMDFile("/tmp/file.md", "sample")
+	assert.Equal(t, 1, calculatePathDepth("/tmp/file.md"))
+	assert.Equal(t, 2, calculatePathDepth("/tmp/user"))
+	createMDFile("/tmp/markdown-index/test.file", "sample")
+	assert.Equal(t, 2, calculatePathDepth("/tmp/markdown-index/test.file"))
+	assert.Equal(t, 3, calculatePathDepth("/tmp/markdown-index/docs"))
+	createMDFile("/tmp/markdown-index/docs/readme.md", "sample")
+	assert.Equal(t, 3, calculatePathDepth("/tmp/markdown-index/docs/readme.md"))
+	assert.Equal(t, 4, calculatePathDepth("/tmp/markdown-index/docs/test"))
+	assert.Equal(t, 1, calculatePathDepth("./"))
+	assert.Equal(t, 1, calculatePathDepth("test/readme.md"))
+
+	os.RemoveAll("/tmp/markdown-index")
+
 }

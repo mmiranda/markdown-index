@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	mdrender "github.com/Kunde21/markdownfmt/v2/markdown"
 	"github.com/yuin/goldmark"
@@ -20,7 +21,7 @@ var ignoreDirectories []string
 
 func main() {
 
-	contentDocument := buildIndexContent(".", ignoreDirectories)
+	contentDocument := buildIndexContent("./", ignoreDirectories)
 
 	createMDFile("toc-index.md", renderPlainMarkdown(contentDocument))
 }
@@ -55,6 +56,22 @@ func contains(slice []string, searchterm string) bool {
 	return false
 }
 
+// calculatePathDepth return s the depth of a folder structure
+func calculatePathDepth(path string) int {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		log.Fatalf("An error occured: %s", err)
+	}
+
+	depth := strings.Count(path, "/")
+	if fileInfo.IsDir() || depth == 1 {
+		return depth
+	}
+
+	return depth - 1
+
+}
+
 // readFile Reads a markdown file and return its content
 func readFile(file string) []byte {
 	content, err := ioutil.ReadFile(file)
@@ -79,9 +96,16 @@ func getFirstParagraph(file string) AbstractParagraph {
 		}
 	}
 
+	abstractContent := ""
+
+	// identify single node documents aka markdown with a single heading/paragraph
+	if doc.FirstChild() != doc.LastChild() {
+		abstractContent = string(doc.FirstChild().NextSibling().Text(source))
+	}
+
 	return AbstractParagraph{
 		string(doc.FirstChild().Text(source)),
-		string(doc.FirstChild().NextSibling().Text(source)),
+		abstractContent,
 	}
 }
 
@@ -101,7 +125,7 @@ func FilterHeadingAbstract(title string, filePath string) AbstractParagraph {
 
 	doc, source := ParseDocument(filePath)
 
-	ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		s := ast.WalkStatus(ast.WalkContinue)
 		var err error
 
@@ -114,6 +138,10 @@ func FilterHeadingAbstract(title string, filePath string) AbstractParagraph {
 		}
 		return s, err
 	})
+
+	if err != nil {
+		log.Fatalf("An error occured: %s", err)
+	}
 
 	return content
 }
@@ -144,7 +172,7 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) ast.Node {
 	files := findFiles(sourcePath, ignoreDirectories)
 	finalDoc := ast.NewDocument()
 	for key, _ := range files {
-		heading := ast.NewHeading(1)
+		heading := ast.NewHeading(calculatePathDepth(files[key]))
 
 		paragraph := ast.NewParagraph()
 
@@ -168,7 +196,11 @@ func renderHTMLMarkdown(document ast.Node) string {
 	)
 	gm := goldmark.New()
 
-	_ = gm.Renderer().Render(&buffer, content, document)
+	err := gm.Renderer().Render(&buffer, content, document)
+
+	if err != nil {
+		log.Fatalf("An error occured: %s", err)
+	}
 
 	return buffer.String()
 }
@@ -179,7 +211,11 @@ func renderPlainMarkdown(document ast.Node) string {
 		buffer  bytes.Buffer
 	)
 	mdrender := mdrender.NewRenderer()
-	mdrender.Render(&buffer, content, document)
+	err := mdrender.Render(&buffer, content, document)
+
+	if err != nil {
+		log.Fatalf("An error occured: %s", err)
+	}
 
 	return buffer.String()
 }
