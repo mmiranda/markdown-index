@@ -164,7 +164,7 @@ func TestCalculateDepth(t *testing.T) {
 	assert.Equal(t, 1, calculatePathDepth("/tmp"))
 	createMDFile("/tmp/file.md", "sample")
 	assert.Equal(t, 1, calculatePathDepth("/tmp/file.md"))
-	assert.Equal(t, 2, calculatePathDepth("/tmp/user"))
+	assert.Equal(t, 2, calculatePathDepth("/tmp/markdown-index"))
 	createMDFile("/tmp/markdown-index/test.file", "sample")
 	assert.Equal(t, 2, calculatePathDepth("/tmp/markdown-index/test.file"))
 	assert.Equal(t, 3, calculatePathDepth("/tmp/markdown-index/docs"))
