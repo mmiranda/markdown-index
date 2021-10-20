@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,6 +18,21 @@ import (
 )
 
 var ignoreDirectories []string
+
+//AbstractParagraph represents the paragraph which will be used as abstract.
+type AbstractParagraph struct {
+	title   string
+	content string
+}
+
+type RawMarkdown struct {
+	path    string
+	content []byte
+}
+
+type AstNode struct {
+	ast.Node
+}
 
 func main() {
 
@@ -59,36 +73,21 @@ func contains(slice []string, searchterm string) bool {
 }
 
 // calculatePathDepth returns the depth of a folder structure
-func calculatePathDepth(path string) int {
+func (md RawMarkdown) calculatePathDepth() int {
 
-	return strings.Count(path, "/")
+	return strings.Count(md.path, "/")
 }
 
 // readFile Reads a markdown file and return its content
-func readFile(file string) []byte {
-	content, err := ioutil.ReadFile(file)
+func (file RawMarkdown) readFile() []byte {
+	content, err := ioutil.ReadFile(file.path)
 
 	if err != nil {
-		fmt.Println("Error opening file!")
+		log.Fatalf("Error opening file %s!", file.path)
 	}
 
 	return content
 
-}
-
-//AbstractParagraph represents the paragraph which will be used as abstract.
-type AbstractParagraph struct {
-	title   string
-	content string
-}
-
-type RawMarkdown struct {
-	path    string
-	content []byte
-}
-
-type AstNode struct {
-	ast.Node
 }
 
 // FirstParagraph gets the text of first paragraph in a markdown file
@@ -116,7 +115,7 @@ func (md *RawMarkdown) FirstParagraph() AbstractParagraph {
 }
 
 func (md *RawMarkdown) ParseDocument() (ast.Node, []byte) {
-	source := readFile(md.path)
+	source := md.readFile()
 	gm := goldmark.New(
 		goldmark.WithParserOptions(
 			parser.WithASTTransformers(),
@@ -171,11 +170,12 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) (AstNode, 
 
 	files := findFiles(sourcePath, ignoreDirectories)
 
-	finalDoc := AstNode{ast.NewDocument()}
+	var finalDoc AstNode
+	finalDoc.Node = ast.NewDocument()
 	var file RawMarkdown
 	for key, _ := range files {
 		file.path = files[key]
-		heading := ast.NewHeading(calculatePathDepth(files[key]))
+		heading := ast.NewHeading(file.calculatePathDepth())
 
 		paragraph := ast.NewParagraph()
 

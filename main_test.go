@@ -13,10 +13,12 @@ func TestShouldFindReadme(t *testing.T) {
 	assert.Equal(t, 6, len(files))
 }
 
-func TestShouldReadFileContent(t *testing.T) {
+func TestShouldReadFirstFileContent(t *testing.T) {
 	files := findFiles("./test", []string{})
 
-	content := readFile(files[0])
+	var file RawMarkdown
+	file.path = files[0]
+	content := file.readFile()
 
 	assert.Contains(t, string(content), "# Root Level Markdown")
 }
@@ -52,11 +54,13 @@ func TestGetFirstParagraphInEveryFile(t *testing.T) {
 func TestCreateSingleLineFile(t *testing.T) {
 	filePath := "/tmp/test.md"
 	contentString := "# Hello, this is a test"
-	// contentString = append(contentString, "\nMultiline test")
+
 	createMDFile(filePath, contentString)
 	assert.FileExists(t, filePath)
 
-	content := readFile(filePath)
+	var file RawMarkdown
+	file.path = filePath
+	content := file.readFile()
 
 	assert.Equal(t, contentString, string(content))
 
@@ -70,7 +74,9 @@ func TestCreateMultiLineFile(t *testing.T) {
 	createMDFile(filePath, contentString)
 	assert.FileExists(t, filePath)
 
-	content := readFile(filePath)
+	var file RawMarkdown
+	file.path = filePath
+	content := file.readFile()
 
 	assert.Equal(t, contentString, string(content))
 	deleteFile(filePath)
@@ -84,8 +90,9 @@ func deleteFile(filePath string) {
 }
 
 func TestCompareFinalFilePlainContent(t *testing.T) {
-	mockFilePath := "test/mock-toc-toc.mock"
-	mockFile := readFile(mockFilePath)
+	var file RawMarkdown
+	file.path = "test/mock-toc-toc.mock"
+	mockFile := file.readFile()
 
 	contentNode, contentByte := buildIndexContent("./test", []string{})
 
@@ -93,8 +100,9 @@ func TestCompareFinalFilePlainContent(t *testing.T) {
 }
 
 func TestCompareFinalFileHTMLContent(t *testing.T) {
-	mockFilePath := "test/mock-toc-toc-html.mock"
-	mockFile := readFile(mockFilePath)
+	var file RawMarkdown
+	file.path = "test/mock-toc-toc-html.mock"
+	mockFile := file.readFile()
 
 	contentNode, contentByte := buildIndexContent("./test", []string{})
 
@@ -102,8 +110,9 @@ func TestCompareFinalFileHTMLContent(t *testing.T) {
 }
 
 func TestCompareFinalFilePlainContentWithIgnore(t *testing.T) {
-	mockFilePath := "test/mock-toc-toc-ignored.mock"
-	mockFile := readFile(mockFilePath)
+	var file RawMarkdown
+	file.path = "test/mock-toc-toc-ignored.mock"
+	mockFile := file.readFile()
 
 	contentNode, contentByte := buildIndexContent("./test", []string{"folder2"})
 
@@ -113,33 +122,41 @@ func TestCompareFinalFilePlainContentWithIgnore(t *testing.T) {
 func TestCompareFinalFileHTMLContentWithIgnore(t *testing.T) {
 	contentNode, contentByte := buildIndexContent("./test", []string{"folder2"})
 
-	mockFile := readFile("test/mock-toc-toc-html-ignored.mock")
+	var file RawMarkdown
+	file.path = "test/mock-toc-toc-html-ignored.mock"
+	mockFile := file.readFile()
 
 	assert.Equal(t, string(mockFile), contentNode.renderHTMLMarkdown(contentByte))
 }
 
 func TestCompareFinalFilePlainBytes(t *testing.T) {
-	filePath := "/tmp/test-toc.md"
+	var finalFile, mockFile RawMarkdown
+	finalFile.path = "/tmp/test-toc.md"
+
 	contentNode, contentString := buildIndexContent("./test", []string{})
-	createMDFile(filePath, contentNode.renderPlainMarkdown(contentString))
-	fileGenerated := readFile(filePath)
+	createMDFile(finalFile.path, contentNode.renderPlainMarkdown(contentString))
+	fileGenerated := finalFile.readFile()
 
-	mockFile := readFile("./test/mock-toc-toc.mock")
-	assert.True(t, bytes.Equal(fileGenerated, mockFile))
+	mockFile.path = "./test/mock-toc-toc.mock"
+	mock := mockFile.readFile()
+	assert.True(t, bytes.Equal(fileGenerated, mock))
 
-	deleteFile(filePath)
+	deleteFile(finalFile.path)
 }
 
 func TestCompareFinalFileHTMLBytes(t *testing.T) {
-	filePath := "/tmp/test-toc.md"
+	var finalFile, mockFile RawMarkdown
+	finalFile.path = "/tmp/test-toc.md"
+
 	contentNode, contentByte := buildIndexContent("./test", []string{})
-	createMDFile(filePath, contentNode.renderHTMLMarkdown(contentByte))
-	fileGenerated := readFile(filePath)
+	createMDFile(finalFile.path, contentNode.renderHTMLMarkdown(contentByte))
+	fileGenerated := finalFile.readFile()
 
-	mockFile := readFile("./test/mock-toc-toc-html.mock")
-	assert.True(t, bytes.Equal(fileGenerated, mockFile))
+	mockFile.path = "./test/mock-toc-toc-html.mock"
+	mockFileContent := mockFile.readFile()
+	assert.True(t, bytes.Equal(fileGenerated, mockFileContent))
 
-	deleteFile(filePath)
+	deleteFile(finalFile.path)
 }
 
 func TestFilterAbstractHeading(t *testing.T) {
@@ -160,22 +177,28 @@ func TestContainsHelper(t *testing.T) {
 }
 
 func TestCalculateDepth(t *testing.T) {
+	var file RawMarkdown
 
-	assert.Equal(t, 1, calculatePathDepth("test/README.md"))
-	assert.Equal(t, 2, calculatePathDepth("test/folder1/README.md"))
-	assert.Equal(t, 3, calculatePathDepth("test/folder1/folder11/README.md"))
-	assert.Equal(t, 2, calculatePathDepth("test/folder2/README.md"))
+	file.path = "test/README.md"
+	assert.Equal(t, 1, file.calculatePathDepth())
+	file.path = "test/folder1/README.md"
+	assert.Equal(t, 2, file.calculatePathDepth())
+	file.path = "test/folder1/folder11/README.md"
+	assert.Equal(t, 3, file.calculatePathDepth())
+	file.path = "test/folder2/README.md"
+	assert.Equal(t, 2, file.calculatePathDepth())
 
 }
 
 func TestBuildTableOfContents(t *testing.T) {
-	var doc RawMarkdown
+	var doc, mock RawMarkdown
 	doc.content = []byte("# Title\nContent")
 
 	tocNode, tocByte := doc.buildTableOfContents()
 
 	render := tocNode.renderHTMLMarkdown(tocByte)
-	mockToc := readFile("test/mock-table-of-content.mock")
+	mock.path = "test/mock-table-of-content.mock"
+	mockToc := mock.readFile()
 
 	assert.Equal(t, string(mockToc), render)
 }
