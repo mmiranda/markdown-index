@@ -25,7 +25,7 @@ func main() {
 	// Add Cobra CLI later
 	contentNode, contentByte := buildIndexContent(".", ignoreDirectories)
 
-	createMDFile("toc-index.md", renderPlainMarkdown(contentNode, contentByte))
+	createMDFile("toc-index.md", contentNode.renderPlainMarkdown(contentByte))
 }
 
 // findFiles looks for files recursively
@@ -86,7 +86,9 @@ type RawMarkdown struct {
 	path string
 }
 
-type AstDocument ast.Node
+type AstNode struct {
+	ast.Node
+}
 
 // FirstParagraph gets the text of first paragraph in a markdown file
 func (md *RawMarkdown) FirstParagraph() AbstractParagraph {
@@ -164,10 +166,11 @@ func createMDFile(filePath string, content string) {
 	file.Close()
 }
 
-func buildIndexContent(sourcePath string, ignoreDirectories []string) (ast.Node, []byte) {
+func buildIndexContent(sourcePath string, ignoreDirectories []string) (AstNode, []byte) {
 
 	files := findFiles(sourcePath, ignoreDirectories)
-	finalDoc := ast.NewDocument()
+
+	finalDoc := AstNode{ast.NewDocument()}
 
 	for key, _ := range files {
 		file := RawMarkdown{files[key]}
@@ -185,19 +188,19 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) (ast.Node,
 
 	}
 
-	rendered := renderPlainMarkdown(finalDoc, []byte(""))
+	rendered := finalDoc.renderPlainMarkdown([]byte(""))
 
 	tocNode, source := buildTableOfContents([]byte(rendered))
 
 	return tocNode, source
 }
 
-func renderHTMLMarkdown(document ast.Node, content []byte) string {
+func (document AstNode) renderHTMLMarkdown(content []byte) string {
 	var buffer bytes.Buffer
 
 	gm := goldmark.New()
 
-	err := gm.Renderer().Render(&buffer, content, document)
+	err := gm.Renderer().Render(&buffer, content, document.Node)
 
 	if err != nil {
 		log.Fatalf("An error occured: %s", err)
@@ -206,7 +209,19 @@ func renderHTMLMarkdown(document ast.Node, content []byte) string {
 	return buffer.String()
 }
 
-func buildTableOfContents(source []byte) (ast.Node, []byte) {
+func (document AstNode) renderPlainMarkdown(content []byte) string {
+	var buffer bytes.Buffer
+
+	mdrender := mdrender.NewRenderer()
+	err := mdrender.Render(&buffer, content, document.Node)
+	if err != nil {
+		log.Fatalf("An error occured: %s", err)
+	}
+
+	return buffer.String()
+}
+
+func buildTableOfContents(source []byte) (AstNode, []byte) {
 	gm := goldmark.New(
 		goldmark.WithParserOptions(parser.WithAutoHeadingID()),
 		goldmark.WithExtensions(
@@ -214,17 +229,5 @@ func buildTableOfContents(source []byte) (ast.Node, []byte) {
 		),
 	)
 
-	return gm.Parser().Parse(text.NewReader(source)), source
-}
-
-func renderPlainMarkdown(document ast.Node, content []byte) string {
-	var buffer bytes.Buffer
-
-	mdrender := mdrender.NewRenderer()
-	err := mdrender.Render(&buffer, content, document)
-	if err != nil {
-		log.Fatalf("An error occured: %s", err)
-	}
-
-	return buffer.String()
+	return AstNode{gm.Parser().Parse(text.NewReader(source))}, source
 }
