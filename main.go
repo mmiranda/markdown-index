@@ -22,9 +22,10 @@ var ignoreDirectories []string
 
 func main() {
 
+	// Add Cobra CLI later
 	contentNode, contentByte := buildIndexContent(".", ignoreDirectories)
 
-	createMDFile("toc-index.md", renderHTMLMarkdown(contentNode, contentByte))
+	createMDFile("toc-index.md", renderPlainMarkdown(contentNode, contentByte))
 }
 
 // findFiles looks for files recursively
