@@ -83,7 +83,8 @@ type AbstractParagraph struct {
 }
 
 type RawMarkdown struct {
-	path string
+	path    string
+	content []byte
 }
 
 type AstNode struct {
@@ -171,9 +172,9 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) (AstNode, 
 	files := findFiles(sourcePath, ignoreDirectories)
 
 	finalDoc := AstNode{ast.NewDocument()}
-
+	var file RawMarkdown
 	for key, _ := range files {
-		file := RawMarkdown{files[key]}
+		file.path = files[key]
 		heading := ast.NewHeading(calculatePathDepth(files[key]))
 
 		paragraph := ast.NewParagraph()
@@ -188,9 +189,12 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) (AstNode, 
 
 	}
 
-	rendered := finalDoc.renderPlainMarkdown([]byte(""))
+	var markdown RawMarkdown
+	markdown.content = []byte(finalDoc.renderPlainMarkdown([]byte("")))
+	// rendered := finalDoc.renderPlainMarkdown([]byte(""))
 
-	tocNode, source := buildTableOfContents([]byte(rendered))
+	// tocNode, source := buildTableOfContents([]byte(rendered))
+	tocNode, source := markdown.buildTableOfContents()
 
 	return tocNode, source
 }
@@ -221,7 +225,7 @@ func (document AstNode) renderPlainMarkdown(content []byte) string {
 	return buffer.String()
 }
 
-func buildTableOfContents(source []byte) (AstNode, []byte) {
+func (source RawMarkdown) buildTableOfContents() (AstNode, []byte) {
 	gm := goldmark.New(
 		goldmark.WithParserOptions(parser.WithAutoHeadingID()),
 		goldmark.WithExtensions(
@@ -229,5 +233,5 @@ func buildTableOfContents(source []byte) (AstNode, []byte) {
 		),
 	)
 
-	return AstNode{gm.Parser().Parse(text.NewReader(source))}, source
+	return AstNode{gm.Parser().Parse(text.NewReader(source.content))}, source.content
 }

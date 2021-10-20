@@ -23,8 +23,8 @@ func TestShouldReadFileContent(t *testing.T) {
 
 func TestGetFirstParagraph(t *testing.T) {
 	files := findFiles("./test", []string{})
-
-	file := RawMarkdown{files[0]}
+	var file RawMarkdown
+	file.path = files[0]
 	title := "# " + file.FirstParagraph().title
 	content := file.FirstParagraph().content
 
@@ -34,9 +34,9 @@ func TestGetFirstParagraph(t *testing.T) {
 
 func TestGetFirstParagraphInEveryFile(t *testing.T) {
 	files := findFiles("./test", []string{})
-
+	var file RawMarkdown
 	for key, _ := range files {
-		file := RawMarkdown{files[key]}
+		file.path = files[key]
 		content := file.FirstParagraph().content
 		if len(content) > 0 {
 			assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
@@ -143,7 +143,8 @@ func TestCompareFinalFileHTMLBytes(t *testing.T) {
 }
 
 func TestFilterAbstractHeading(t *testing.T) {
-	file := RawMarkdown{"test/README.md"}
+	var file RawMarkdown
+	file.path = "test/README.md"
 	content := file.FilterHeadingAbstract("Another title")
 	assert.NotEmpty(t, content)
 
@@ -168,9 +169,10 @@ func TestCalculateDepth(t *testing.T) {
 }
 
 func TestBuildTableOfContents(t *testing.T) {
-	doc := []byte("# Title\nContent")
+	var doc RawMarkdown
+	doc.content = []byte("# Title\nContent")
 
-	tocNode, tocByte := buildTableOfContents(doc)
+	tocNode, tocByte := doc.buildTableOfContents()
 
 	render := tocNode.renderHTMLMarkdown(tocByte)
 	mockToc := readFile("test/mock-table-of-content.mock")
