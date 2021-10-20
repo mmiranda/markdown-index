@@ -76,12 +76,23 @@ func readFile(file string) []byte {
 
 }
 
-// getFirstParagraph gets the text of first paragraph in a markdown file
-func getFirstParagraph(file string) AbstractParagraph {
+//AbstractParagraph represents the paragraph which will be used as abstract.
+type AbstractParagraph struct {
+	title   string
+	content string
+}
 
-	doc, source := ParseDocument(file)
+type RawMarkdown struct {
+	path string
+}
 
-	if paragraph := FilterHeadingAbstract("Abstract", file); (paragraph != AbstractParagraph{}) {
+type AstDocument ast.Node
+
+// FirstParagraph gets the text of first paragraph in a markdown file
+func (md *RawMarkdown) FirstParagraph() AbstractParagraph {
+	doc, source := md.ParseDocument()
+
+	if paragraph := md.FilterHeadingAbstract("Abstract"); (paragraph != AbstractParagraph{}) {
 		return AbstractParagraph{
 			paragraph.title,
 			paragraph.content,
@@ -101,8 +112,8 @@ func getFirstParagraph(file string) AbstractParagraph {
 	}
 }
 
-func ParseDocument(filePath string) (ast.Node, []byte) {
-	source := readFile(filePath)
+func (md *RawMarkdown) ParseDocument() (ast.Node, []byte) {
+	source := readFile(md.path)
 	gm := goldmark.New(
 		goldmark.WithParserOptions(
 			parser.WithASTTransformers(),
@@ -112,10 +123,10 @@ func ParseDocument(filePath string) (ast.Node, []byte) {
 	return gm.Parser().Parse(text.NewReader(source)), source
 }
 
-func FilterHeadingAbstract(title string, filePath string) AbstractParagraph {
+func (md *RawMarkdown) FilterHeadingAbstract(title string) AbstractParagraph {
 	var content AbstractParagraph
 
-	doc, source := ParseDocument(filePath)
+	doc, source := md.ParseDocument()
 
 	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		s := ast.WalkStatus(ast.WalkContinue)
@@ -138,12 +149,6 @@ func FilterHeadingAbstract(title string, filePath string) AbstractParagraph {
 	return content
 }
 
-//AbstractParagraph represents the paragraph which will be used as abstract.
-type AbstractParagraph struct {
-	title   string
-	content string
-}
-
 func createMDFile(filePath string, content string) {
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
@@ -163,14 +168,16 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) (ast.Node,
 
 	files := findFiles(sourcePath, ignoreDirectories)
 	finalDoc := ast.NewDocument()
+
 	for key, _ := range files {
+		file := RawMarkdown{files[key]}
 		heading := ast.NewHeading(calculatePathDepth(files[key]))
 
 		paragraph := ast.NewParagraph()
 
-		heading.AppendChild(heading, ast.NewString([]byte(getFirstParagraph(files[key]).title)))
+		heading.AppendChild(heading, ast.NewString([]byte(file.FirstParagraph().title)))
 
-		paragraphContent := getFirstParagraph(files[key]).content + "\n\n[Read more on the original file...](" + files[key] + ")"
+		paragraphContent := file.FirstParagraph().content + "\n\n[Read more on the original file...](" + files[key] + ")"
 		paragraph.AppendChild(paragraph, ast.NewString([]byte(paragraphContent)))
 
 		finalDoc.AppendChild(finalDoc, heading)

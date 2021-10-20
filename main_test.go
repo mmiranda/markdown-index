@@ -24,8 +24,9 @@ func TestShouldReadFileContent(t *testing.T) {
 func TestGetFirstParagraph(t *testing.T) {
 	files := findFiles("./test", []string{})
 
-	title := "# " + getFirstParagraph(files[0]).title
-	content := getFirstParagraph(files[0]).content
+	file := RawMarkdown{files[0]}
+	title := "# " + file.FirstParagraph().title
+	content := file.FirstParagraph().content
 
 	assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
 	assert.Equal(t, "# Root Level Markdown", title)
@@ -35,7 +36,8 @@ func TestGetFirstParagraphInEveryFile(t *testing.T) {
 	files := findFiles("./test", []string{})
 
 	for key, _ := range files {
-		content := getFirstParagraph(files[key]).content
+		file := RawMarkdown{files[key]}
+		content := file.FirstParagraph().content
 		if len(content) > 0 {
 			assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
 		} else {
@@ -141,11 +143,11 @@ func TestCompareFinalFileHTMLBytes(t *testing.T) {
 }
 
 func TestFilterAbstractHeading(t *testing.T) {
-
-	content := FilterHeadingAbstract("Another title", "test/README.md")
+	file := RawMarkdown{"test/README.md"}
+	content := file.FilterHeadingAbstract("Another title")
 	assert.NotEmpty(t, content)
 
-	content = FilterHeadingAbstract("Unexistent title heading", "test/README.md")
+	content = file.FilterHeadingAbstract("Unexistent title heading")
 	assert.Empty(t, content)
 }
 
