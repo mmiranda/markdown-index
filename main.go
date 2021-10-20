@@ -191,9 +191,7 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) (AstNode, 
 
 	var markdown RawMarkdown
 	markdown.content = []byte(finalDoc.renderPlainMarkdown([]byte("")))
-	// rendered := finalDoc.renderPlainMarkdown([]byte(""))
 
-	// tocNode, source := buildTableOfContents([]byte(rendered))
 	tocNode, source := markdown.buildTableOfContents()
 
 	return tocNode, source
