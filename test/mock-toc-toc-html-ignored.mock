@@ -1,38 +1,33 @@
+<h1>Table of Contents</h1>
 <ul>
 <li>
-Root Level Markdown<ul>
+<a href="#root-level-markdown">Root Level Markdown</a><ul>
 <li>
-Level 1 Markdown<ul>
+<a href="#level-1-markdown">Level 1 Markdown</a><ul>
 <li>
-Level 1.1 Markdown</li>
+<a href="#level-11-markdown">Level 1.1 Markdown</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li>
-this file has a single line<ul>
+<a href="#this-file-has-a-single-line">this file has a single line</a><ul>
 <li>
-Abstract</li>
+<a href="#abstract">Abstract</a></li>
 </ul>
 </li>
 </ul>
-<h1>Root Level Markdown</h1>
-<p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
-
-[Read more on the original file...](test/README.md)</p>
-<h2>Level 1 Markdown</h2>
-<p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
-
-[Read more on the original file...](test/folder1/README.md)</p>
-<h3>Level 1.1 Markdown</h3>
-<p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
-
-[Read more on the original file...](test/folder1/folder11/README.md)</p>
-<h1>this file has a single line</h1>
-<p>
-
-[Read more on the original file...](test/single-line.md)</p>
-<h2>Abstract</h2>
-<p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
-
-[Read more on the original file...](test/with-abstract/README.md)</p>
+<h1 id="root-level-markdown">Root Level Markdown</h1>
+<p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.</p>
+<p><a href="test/README.md">Read more on the original file...</a></p>
+<h2 id="level-1-markdown">Level 1 Markdown</h2>
+<p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.</p>
+<p><a href="test/folder1/README.md">Read more on the original file...</a></p>
+<h3 id="level-11-markdown">Level 1.1 Markdown</h3>
+<p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.</p>
+<p><a href="test/folder1/folder11/README.md">Read more on the original file...</a></p>
+<h1 id="this-file-has-a-single-line">this file has a single line</h1>
+<p><a href="test/single-line.md">Read more on the original file...</a></p>
+<h2 id="abstract">Abstract</h2>
+<p>This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.</p>
+<p><a href="test/with-abstract/README.md">Read more on the original file...</a></p>

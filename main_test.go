@@ -83,45 +83,43 @@ func deleteFile(filePath string) {
 
 func TestCompareFinalFilePlainContent(t *testing.T) {
 	mockFilePath := "test/mock-toc-toc.mock"
-	contentString := buildIndexContent("./test", []string{})
-
 	mockFile := readFile(mockFilePath)
 
-	assert.Equal(t, string(mockFile), renderPlainMarkdown(contentString))
+	contentNode, contentByte := buildIndexContent("./test", []string{})
+
+	assert.Equal(t, string(mockFile), renderPlainMarkdown(contentNode, contentByte))
 }
 
 func TestCompareFinalFileHTMLContent(t *testing.T) {
 	mockFilePath := "test/mock-toc-toc-html.mock"
-	contentString := buildIndexContent("./test", []string{})
-
 	mockFile := readFile(mockFilePath)
 
-	assert.Equal(t, string(mockFile), renderHTMLMarkdown(contentString))
+	contentNode, contentByte := buildIndexContent("./test", []string{})
+
+	assert.Equal(t, string(mockFile), renderHTMLMarkdown(contentNode, contentByte))
 }
 
 func TestCompareFinalFilePlainContentWithIgnore(t *testing.T) {
 	mockFilePath := "test/mock-toc-toc-ignored.mock"
-
-	contentString := buildIndexContent("./test", []string{"folder2"})
-
 	mockFile := readFile(mockFilePath)
 
-	assert.Equal(t, string(mockFile), renderPlainMarkdown(contentString))
+	contentNode, contentByte := buildIndexContent("./test", []string{"folder2"})
+
+	assert.Equal(t, string(mockFile), renderPlainMarkdown(contentNode, contentByte))
 }
 
 func TestCompareFinalFileHTMLContentWithIgnore(t *testing.T) {
-	mockFilePath := "test/mock-toc-toc-html-ignored.mock"
+	contentNode, contentByte := buildIndexContent("./test", []string{"folder2"})
 
-	contentString := buildIndexContent("./test", []string{"folder2"})
+	mockFile := readFile("test/mock-toc-toc-html-ignored.mock")
 
-	mockFile := readFile(mockFilePath)
-
-	assert.Equal(t, string(mockFile), renderHTMLMarkdown(contentString))
+	assert.Equal(t, string(mockFile), renderHTMLMarkdown(contentNode, contentByte))
 }
+
 func TestCompareFinalFilePlainBytes(t *testing.T) {
 	filePath := "/tmp/test-toc.md"
-	contentDocument := buildIndexContent("./test", []string{})
-	createMDFile(filePath, renderPlainMarkdown(contentDocument))
+	contentDocument, contentString := buildIndexContent("./test", []string{})
+	createMDFile(filePath, renderPlainMarkdown(contentDocument, contentString))
 	fileGenerated := readFile(filePath)
 
 	mockFile := readFile("./test/mock-toc-toc.mock")
@@ -132,8 +130,8 @@ func TestCompareFinalFilePlainBytes(t *testing.T) {
 
 func TestCompareFinalFileHTMLBytes(t *testing.T) {
 	filePath := "/tmp/test-toc.md"
-	contentDocument := buildIndexContent("./test", []string{})
-	createMDFile(filePath, renderHTMLMarkdown(contentDocument))
+	contentNode, contentByte := buildIndexContent("./test", []string{})
+	createMDFile(filePath, renderHTMLMarkdown(contentNode, contentByte))
 	fileGenerated := readFile(filePath)
 
 	mockFile := readFile("./test/mock-toc-toc-html.mock")
@@ -165,4 +163,15 @@ func TestCalculateDepth(t *testing.T) {
 	assert.Equal(t, 3, calculatePathDepth("test/folder1/folder11/README.md"))
 	assert.Equal(t, 2, calculatePathDepth("test/folder2/README.md"))
 
+}
+
+func TestBuildTableOfContents(t *testing.T) {
+	doc := []byte("# Title\nContent")
+
+	tocNode, tocByte := buildTableOfContents(doc)
+
+	render := renderHTMLMarkdown(tocNode, tocByte)
+	mockToc := readFile("test/mock-table-of-content.mock")
+
+	assert.Equal(t, string(mockToc), render)
 }

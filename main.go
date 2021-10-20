@@ -22,9 +22,9 @@ var ignoreDirectories []string
 
 func main() {
 
-	contentDocument := buildIndexContent(".", ignoreDirectories)
+	contentNode, contentByte := buildIndexContent(".", ignoreDirectories)
 
-	createMDFile("toc-index.md", renderPlainMarkdown(contentDocument))
+	createMDFile("toc-index.md", renderHTMLMarkdown(contentNode, contentByte))
 }
 
 // findFiles looks for files recursively
@@ -158,7 +158,7 @@ func createMDFile(filePath string, content string) {
 	file.Close()
 }
 
-func buildIndexContent(sourcePath string, ignoreDirectories []string) ast.Node {
+func buildIndexContent(sourcePath string, ignoreDirectories []string) (ast.Node, []byte) {
 
 	files := findFiles(sourcePath, ignoreDirectories)
 	finalDoc := ast.NewDocument()
@@ -177,14 +177,16 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) ast.Node {
 
 	}
 
-	return finalDoc
+	rendered := renderPlainMarkdown(finalDoc, []byte(""))
+
+	tocNode, source := buildTableOfContents([]byte(rendered))
+
+	return tocNode, source
 }
 
-func renderHTMLMarkdown(document ast.Node) string {
-	var (
-		content []byte
-		buffer  bytes.Buffer
-	)
+func renderHTMLMarkdown(document ast.Node, content []byte) string {
+	var buffer bytes.Buffer
+
 	gm := goldmark.New()
 
 	err := gm.Renderer().Render(&buffer, content, document)
@@ -192,34 +194,26 @@ func renderHTMLMarkdown(document ast.Node) string {
 	if err != nil {
 		log.Fatalf("An error occured: %s", err)
 	}
-	buffer = prepareTableOfContents(document)
+
 	return buffer.String()
 }
 
-func prepareTableOfContents(document ast.Node) bytes.Buffer {
-	tree, err := toc.Inspect(document, []byte(""))
-	if err != nil {
-		log.Fatalf("An error occured: %s", err)
-	}
+func buildTableOfContents(source []byte) (ast.Node, []byte) {
+	gm := goldmark.New(
+		goldmark.WithParserOptions(parser.WithAutoHeadingID()),
+		goldmark.WithExtensions(
+			&toc.Extender{},
+		),
+	)
 
-	list := toc.RenderList(tree)
-	var output bytes.Buffer
-
-	document.InsertBefore(document, document.FirstChild(), list)
-
-	// Render the document as output.
-	gm := goldmark.New()
-	gm.Renderer().Render(&output, []byte(""), document)
-
-	return output
+	return gm.Parser().Parse(text.NewReader(source)), source
 }
 
-func renderPlainMarkdown(document ast.Node) string {
+func renderPlainMarkdown(document ast.Node, content []byte) string {
 	var buffer bytes.Buffer
 
-	bufferHtml := prepareTableOfContents(document)
 	mdrender := mdrender.NewRenderer()
-	err := mdrender.Render(&buffer, bufferHtml.Bytes(), document)
+	err := mdrender.Render(&buffer, content, document)
 	if err != nil {
 		log.Fatalf("An error occured: %s", err)
 	}
