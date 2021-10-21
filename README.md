@@ -9,8 +9,8 @@ Markdown-index is a library to help you generate a global index for multiple mar
 The easiest way to install it is using Homebrew:
 
 ```bash
-brew tap foobar
-brew install mmiranda/markdown-index
+brew tap mmiranda/mdindex
+brew install markdown-index
 ```
 
 If you prefer, you also can download the latest binary on the release section, or simply use the pre-built dockerfile image
