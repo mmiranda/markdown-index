@@ -27,3 +27,27 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+
+# Publish on Homebrew Tap
+brews:
+  -
+    name: markdown-index
+    tap:
+      owner: mmiranda
+      name: homebrew-mdindex
+      branch: main
+
+    commit_author:
+      name: Mateus Miranda
+      email: mateusmiranda@gmail.com
+
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+
+    folder: Formula
+
+    homepage: "https://github.com/mmiranda/markdown-index"
+    description: "Tool to easily generate a global Markdown Summary Index based on other markdown files."
+    license: "MIT"
+
+    test: |
+      system "#{bin}/program --version"
