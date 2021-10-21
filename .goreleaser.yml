@@ -46,7 +46,7 @@ brews:
     folder: Formula
 
     homepage: "https://github.com/mmiranda/markdown-index"
-    description: "Tool to generate a global Markdown Summary Index based on other markdown files."
+    description: "Tool to generate a global Markdown Summary Index based on other markdown files"
     license: "MIT"
 
     test: |
