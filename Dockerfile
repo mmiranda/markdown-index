@@ -9,4 +9,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=builder /go/src/github.com/mmiranda/markdown-index/markdown-index .
 RUN pwd && ls
-CMD ["markdown-index"]
+
+VOLUME /data
+
+CMD ["/app/markdown-index"]
