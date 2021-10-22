@@ -3,10 +3,10 @@ package markdown
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -20,11 +20,27 @@ import (
 
 var ignoreDirectories []string
 
-func Execute(outputFile, rootDirectory string) {
+//AbstractParagraph represents the paragraph which will be used as abstract.
+type AbstractParagraph struct {
+	title   string
+	content string
+}
 
-	contentNode, contentByte := buildIndexContent(rootDirectory, ignoreDirectories)
+type RawMarkdown struct {
+	path    string
+	content []byte
+}
 
-	createMDFile(outputFile, renderPlainMarkdown(contentNode, contentByte))
+type AstNode struct {
+	ast.Node
+}
+
+func Execute(output string, directory string) {
+
+	// Add Cobra CLI later
+	contentNode, contentByte := buildIndexContent(directory, ignoreDirectories)
+
+	createMDFile(directory+"/"+output, contentNode.renderPlainMarkdown(contentByte))
 }
 
 // findFiles looks for files recursively
@@ -58,29 +74,27 @@ func contains(slice []string, searchterm string) bool {
 }
 
 // calculatePathDepth returns the depth of a folder structure
-func calculatePathDepth(path string) int {
-
-	return strings.Count(path, "/")
+func (md RawMarkdown) calculatePathDepth() int {
+	return strings.Count(path.Dir(path.Clean("/"+md.path)), "/")
 }
 
 // readFile Reads a markdown file and return its content
-func readFile(file string) []byte {
-	content, err := ioutil.ReadFile(file)
+func (file RawMarkdown) readFile() []byte {
+	content, err := ioutil.ReadFile(file.path)
 
 	if err != nil {
-		fmt.Println("Error opening file!")
+		log.Fatalf("Error opening file %s!", file.path)
 	}
 
 	return content
 
 }
 
-// getFirstParagraph gets the text of first paragraph in a markdown file
-func getFirstParagraph(file string) AbstractParagraph {
+// FirstParagraph gets the text of first paragraph in a markdown file
+func (md *RawMarkdown) FirstParagraph() AbstractParagraph {
+	doc, source := md.ParseDocument()
 
-	doc, source := ParseDocument(file)
-
-	if paragraph := FilterHeadingAbstract("Abstract", file); (paragraph != AbstractParagraph{}) {
+	if paragraph := md.FilterHeadingAbstract("Abstract"); (paragraph != AbstractParagraph{}) {
 		return AbstractParagraph{
 			paragraph.title,
 			paragraph.content,
@@ -100,8 +114,8 @@ func getFirstParagraph(file string) AbstractParagraph {
 	}
 }
 
-func ParseDocument(filePath string) (ast.Node, []byte) {
-	source := readFile(filePath)
+func (md *RawMarkdown) ParseDocument() (ast.Node, []byte) {
+	source := md.readFile()
 	gm := goldmark.New(
 		goldmark.WithParserOptions(
 			parser.WithASTTransformers(),
@@ -111,10 +125,10 @@ func ParseDocument(filePath string) (ast.Node, []byte) {
 	return gm.Parser().Parse(text.NewReader(source)), source
 }
 
-func FilterHeadingAbstract(title string, filePath string) AbstractParagraph {
+func (md *RawMarkdown) FilterHeadingAbstract(title string) AbstractParagraph {
 	var content AbstractParagraph
 
-	doc, source := ParseDocument(filePath)
+	doc, source := md.ParseDocument()
 
 	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		s := ast.WalkStatus(ast.WalkContinue)
@@ -137,12 +151,6 @@ func FilterHeadingAbstract(title string, filePath string) AbstractParagraph {
 	return content
 }
 
-//AbstractParagraph represents the paragraph which will be used as abstract.
-type AbstractParagraph struct {
-	title   string
-	content string
-}
-
 func createMDFile(filePath string, content string) {
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
@@ -158,18 +166,23 @@ func createMDFile(filePath string, content string) {
 	file.Close()
 }
 
-func buildIndexContent(sourcePath string, ignoreDirectories []string) (ast.Node, []byte) {
+func buildIndexContent(sourcePath string, ignoreDirectories []string) (AstNode, []byte) {
 
 	files := findFiles(sourcePath, ignoreDirectories)
-	finalDoc := ast.NewDocument()
-	for key, _ := range files {
-		heading := ast.NewHeading(calculatePathDepth(files[key]))
+
+	var finalDoc AstNode
+	finalDoc.Node = ast.NewDocument()
+	var file RawMarkdown
+	for _, filepath := range files {
+		file.path = filepath
+		heading := ast.NewHeading(file.calculatePathDepth())
 
 		paragraph := ast.NewParagraph()
 
-		heading.AppendChild(heading, ast.NewString([]byte(getFirstParagraph(files[key]).title)))
+		heading.AppendChild(heading, ast.NewString([]byte(file.FirstParagraph().title)))
 
-		paragraphContent := getFirstParagraph(files[key]).content + "\n\n[Read more on the original file...](" + files[key] + ")"
+		paragraphContent := file.FirstParagraph().content + "\n\n[Read more on the original file...](" + strings.TrimPrefix(filepath, "../") + ")"
+		// paragraphContent := file.FirstParagraph().content + "\n\n[Read more on the original file...](" + filepath + ")"
 		paragraph.AppendChild(paragraph, ast.NewString([]byte(paragraphContent)))
 
 		finalDoc.AppendChild(finalDoc, heading)
@@ -177,19 +190,20 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) (ast.Node,
 
 	}
 
-	rendered := renderPlainMarkdown(finalDoc, []byte(""))
+	var markdown RawMarkdown
+	markdown.content = []byte(finalDoc.renderPlainMarkdown([]byte("")))
 
-	tocNode, source := buildTableOfContents([]byte(rendered))
+	tocNode, source := markdown.buildTableOfContents()
 
 	return tocNode, source
 }
 
-func renderHTMLMarkdown(document ast.Node, content []byte) string {
+func (document AstNode) renderHTMLMarkdown(content []byte) string {
 	var buffer bytes.Buffer
 
 	gm := goldmark.New()
 
-	err := gm.Renderer().Render(&buffer, content, document)
+	err := gm.Renderer().Render(&buffer, content, document.Node)
 
 	if err != nil {
 		log.Fatalf("An error occured: %s", err)
@@ -198,7 +212,19 @@ func renderHTMLMarkdown(document ast.Node, content []byte) string {
 	return buffer.String()
 }
 
-func buildTableOfContents(source []byte) (ast.Node, []byte) {
+func (document AstNode) renderPlainMarkdown(content []byte) string {
+	var buffer bytes.Buffer
+
+	mdrender := mdrender.NewRenderer()
+	err := mdrender.Render(&buffer, content, document.Node)
+	if err != nil {
+		log.Fatalf("An error occured: %s", err)
+	}
+
+	return buffer.String()
+}
+
+func (source RawMarkdown) buildTableOfContents() (AstNode, []byte) {
 	gm := goldmark.New(
 		goldmark.WithParserOptions(parser.WithAutoHeadingID()),
 		goldmark.WithExtensions(
@@ -206,17 +232,5 @@ func buildTableOfContents(source []byte) (ast.Node, []byte) {
 		),
 	)
 
-	return gm.Parser().Parse(text.NewReader(source)), source
-}
-
-func renderPlainMarkdown(document ast.Node, content []byte) string {
-	var buffer bytes.Buffer
-
-	mdrender := mdrender.NewRenderer()
-	err := mdrender.Render(&buffer, content, document)
-	if err != nil {
-		log.Fatalf("An error occured: %s", err)
-	}
-
-	return buffer.String()
+	return AstNode{gm.Parser().Parse(text.NewReader(source.content))}, source.content
 }
