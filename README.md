@@ -13,11 +13,12 @@ brew tap mmiranda/mdindex
 brew install markdown-index
 ```
 
-If you prefer, you also can download the latest binary on the release section, or simply use the pre-built dockerfile image
+If you prefer, you also can download the latest binary on the [release section](https://github.com/mmiranda/markdown-index/releases), or simply use the pre-built [dockerfile image](#dockerfile)
 
 ## Usage
+You can use this tool using multiple ways:
 
-### Using Local
+### Running Local
 ```bash
 cd some-directory
 markdown-index
@@ -25,12 +26,9 @@ markdown-index
 
 ### Dockerfile
 ```bash
-docker run --rm -it --entrypoint=/bin/sh mmiranda/markdown-index:latest --directory /path/to/directory
+docker pull ghcr.io/mmiranda/markdown-index:latest
+docker run --rm -it -v /path/to/root/md/files:/data ghcr.io/mmiranda/markdown-index:latest
 ```
-
-### Github Actions
-
-You can also use this in your Github Actions workflows - TBD
 
 
 After running the command, a new markdown file will be created containing a summary of every other file found.
