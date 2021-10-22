@@ -1,4 +1,4 @@
-package main
+package markdown
 
 import (
 	"bytes"
@@ -8,13 +8,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	TESTDIR = "../test"
+)
+
 func TestShouldFindReadme(t *testing.T) {
-	files := findFiles("./test", []string{})
+	files := findFiles(TESTDIR, []string{})
 	assert.Equal(t, 6, len(files))
 }
 
 func TestShouldReadFirstFileContent(t *testing.T) {
-	files := findFiles("./test", []string{})
+	files := findFiles(TESTDIR, []string{})
 
 	var file RawMarkdown
 	file.path = files[0]
@@ -24,7 +28,7 @@ func TestShouldReadFirstFileContent(t *testing.T) {
 }
 
 func TestGetFirstParagraph(t *testing.T) {
-	files := findFiles("./test", []string{})
+	files := findFiles(TESTDIR, []string{})
 	var file RawMarkdown
 	file.path = files[0]
 	title := "# " + file.FirstParagraph().title
@@ -91,39 +95,39 @@ func deleteFile(filePath string) {
 
 func TestCompareFinalFilePlainContent(t *testing.T) {
 	var file RawMarkdown
-	file.path = "test/mock-toc-toc.mock"
+	file.path = TESTDIR + "/mock-toc-toc.mock"
 	mockFile := file.readFile()
 
-	contentNode, contentByte := buildIndexContent("./test", []string{})
+	contentNode, contentByte := buildIndexContent(TESTDIR, []string{})
 
 	assert.Equal(t, string(mockFile), contentNode.renderPlainMarkdown(contentByte))
 }
 
 func TestCompareFinalFileHTMLContent(t *testing.T) {
 	var file RawMarkdown
-	file.path = "test/mock-toc-toc-html.mock"
+	file.path = TESTDIR + "/mock-toc-toc-html.mock"
 	mockFile := file.readFile()
 
-	contentNode, contentByte := buildIndexContent("./test", []string{})
+	contentNode, contentByte := buildIndexContent(TESTDIR, []string{})
 
 	assert.Equal(t, string(mockFile), contentNode.renderHTMLMarkdown(contentByte))
 }
 
 func TestCompareFinalFilePlainContentWithIgnore(t *testing.T) {
 	var file RawMarkdown
-	file.path = "test/mock-toc-toc-ignored.mock"
+	file.path = TESTDIR + "/mock-toc-toc-ignored.mock"
 	mockFile := file.readFile()
 
-	contentNode, contentByte := buildIndexContent("./test", []string{"folder2"})
+	contentNode, contentByte := buildIndexContent(TESTDIR, []string{"folder2"})
 
 	assert.Equal(t, string(mockFile), contentNode.renderPlainMarkdown(contentByte))
 }
 
 func TestCompareFinalFileHTMLContentWithIgnore(t *testing.T) {
-	contentNode, contentByte := buildIndexContent("./test", []string{"folder2"})
+	contentNode, contentByte := buildIndexContent(TESTDIR, []string{"folder2"})
 
 	var file RawMarkdown
-	file.path = "test/mock-toc-toc-html-ignored.mock"
+	file.path = TESTDIR + "/mock-toc-toc-html-ignored.mock"
 	mockFile := file.readFile()
 
 	assert.Equal(t, string(mockFile), contentNode.renderHTMLMarkdown(contentByte))
@@ -133,11 +137,11 @@ func TestCompareFinalFilePlainBytes(t *testing.T) {
 	var finalFile, mockFile RawMarkdown
 	finalFile.path = "/tmp/test-toc.md"
 
-	contentNode, contentString := buildIndexContent("./test", []string{})
+	contentNode, contentString := buildIndexContent(TESTDIR, []string{})
 	createMDFile(finalFile.path, contentNode.renderPlainMarkdown(contentString))
 	fileGenerated := finalFile.readFile()
 
-	mockFile.path = "./test/mock-toc-toc.mock"
+	mockFile.path = TESTDIR + "/mock-toc-toc.mock"
 	mock := mockFile.readFile()
 	assert.True(t, bytes.Equal(fileGenerated, mock))
 
@@ -148,11 +152,11 @@ func TestCompareFinalFileHTMLBytes(t *testing.T) {
 	var finalFile, mockFile RawMarkdown
 	finalFile.path = "/tmp/test-toc.md"
 
-	contentNode, contentByte := buildIndexContent("./test", []string{})
+	contentNode, contentByte := buildIndexContent(TESTDIR, []string{})
 	createMDFile(finalFile.path, contentNode.renderHTMLMarkdown(contentByte))
 	fileGenerated := finalFile.readFile()
 
-	mockFile.path = "./test/mock-toc-toc-html.mock"
+	mockFile.path = TESTDIR + "/mock-toc-toc-html.mock"
 	mockFileContent := mockFile.readFile()
 	assert.True(t, bytes.Equal(fileGenerated, mockFileContent))
 
@@ -161,7 +165,7 @@ func TestCompareFinalFileHTMLBytes(t *testing.T) {
 
 func TestFilterAbstractHeading(t *testing.T) {
 	var file RawMarkdown
-	file.path = "test/README.md"
+	file.path = TESTDIR + "/README.md"
 	content := file.FilterHeadingAbstract("Another title")
 	assert.NotEmpty(t, content)
 
@@ -179,13 +183,13 @@ func TestContainsHelper(t *testing.T) {
 func TestCalculateDepth(t *testing.T) {
 	var file RawMarkdown
 
-	file.path = "test/README.md"
+	file.path = TESTDIR + "/README.md"
 	assert.Equal(t, 1, file.calculatePathDepth())
-	file.path = "test/folder1/README.md"
+	file.path = TESTDIR + "/folder1/README.md"
 	assert.Equal(t, 2, file.calculatePathDepth())
-	file.path = "test/folder1/folder11/README.md"
+	file.path = TESTDIR + "/folder1/folder11/README.md"
 	assert.Equal(t, 3, file.calculatePathDepth())
-	file.path = "test/folder2/README.md"
+	file.path = TESTDIR + "/folder2/README.md"
 	assert.Equal(t, 2, file.calculatePathDepth())
 
 }
@@ -197,8 +201,27 @@ func TestBuildTableOfContents(t *testing.T) {
 	tocNode, tocByte := doc.buildTableOfContents()
 
 	render := tocNode.renderHTMLMarkdown(tocByte)
-	mock.path = "test/mock-table-of-content.mock"
+	mock.path = TESTDIR + "/mock-table-of-content.mock"
 	mockToc := mock.readFile()
 
 	assert.Equal(t, string(mockToc), render)
+}
+
+func TestCobraExecutionFlow(t *testing.T) {
+	directory := TESTDIR
+	output := "my-test-file.md"
+	Execute(output, directory)
+
+	var finalFile RawMarkdown
+	finalFile.path = directory + "/" + output
+	fileGenerated := finalFile.readFile()
+
+	var mockFile RawMarkdown
+	mockFile.path = TESTDIR + "/mock-toc-toc.mock"
+	mock := mockFile.readFile()
+
+	assert.True(t, bytes.Equal(fileGenerated, mock))
+	assert.FileExists(t, directory+"/"+output)
+
+	deleteFile(directory + "/" + output)
 }
