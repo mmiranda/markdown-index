@@ -19,10 +19,7 @@ var rootCmd = &cobra.Command{
 	Long: `markdown-index iterates through a given directory, 
 reads all markdown files recursively and generate for you 
 a index file with the summary of each file found.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Executing script...")
 		markdown.Execute(output, directory)
 	},
 }
@@ -44,7 +41,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
-	rootCmd.PersistentFlags().StringVar(&directory, "directory", "./", "Directory to search markdown files recursively")
+	rootCmd.PersistentFlags().StringVar(&directory, "directory", ".", "Directory to search markdown files recursively")
 	rootCmd.PersistentFlags().StringVar(&output, "output", "markdown-index.md", "Final markdown file to be created")
 	rootCmd.PersistentFlags().StringVar(&skipDirectory, "skipDirectory", "", "Skip directory in the recursive walk")
 	rootCmd.PersistentFlags().StringVar(&useHeading, "heading", "", "Use this Heading inside the markdown file as summary of the file")
