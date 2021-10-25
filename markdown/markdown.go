@@ -45,8 +45,8 @@ func Execute(output string, directory string) {
 }
 
 // findFiles looks for files recursively
-func findFiles(root string, ignoreDirectories []string) []string {
-	var files []string
+func findFiles(root string, ignoreDirectories []string) []*RawMarkdown {
+	var files []*RawMarkdown
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		// Ignoring pre-defined directories and files that are not .md
@@ -60,8 +60,7 @@ func findFiles(root string, ignoreDirectories []string) []string {
 			return nil
 		}
 
-		// TODO: replace string append by map of []RawMarkdown
-		files = append(files, path)
+		files = append(files, file)
 		return nil
 	})
 
@@ -240,16 +239,16 @@ func buildIndexContent(sourcePath string, ignoreDirectories []string) (AstNode, 
 
 	var finalDoc AstNode
 	finalDoc.Node = ast.NewDocument()
-	var file RawMarkdown
-	for _, filepath := range files {
-		file.path = filepath
+
+	for _, file := range files {
+
 		heading := ast.NewHeading(file.calculatePathDepth())
 
 		paragraph := ast.NewParagraph()
 
 		heading.AppendChild(heading, ast.NewString([]byte(file.FirstParagraph().title)))
 
-		paragraphContent := file.FirstParagraph().content + "\n\n[Read more on the original file...](" + strings.TrimPrefix(filepath, "../") + ")"
+		paragraphContent := file.FirstParagraph().content + "\n\n[Read more on the original file...](" + strings.TrimPrefix(file.path, "../") + ")"
 		paragraph.AppendChild(paragraph, ast.NewString([]byte(paragraphContent)))
 
 		finalDoc.AppendChild(finalDoc, heading)

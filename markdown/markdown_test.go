@@ -2,6 +2,8 @@ package markdown
 
 import (
 	"bytes"
+	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,19 +21,16 @@ func TestShouldFindReadme(t *testing.T) {
 func TestShouldReadFirstFileContent(t *testing.T) {
 	files := findFiles(TESTDIR, []string{})
 
-	var file RawMarkdown
-	file.path = files[0]
-	content := file.readFile()
+	content := files[0].readFile()
 
 	assert.Contains(t, string(content), "# Root Level Markdown")
 }
 
 func TestGetFirstParagraph(t *testing.T) {
 	files := findFiles(TESTDIR, []string{})
-	var file RawMarkdown
-	file.path = files[0]
-	title := "# " + file.FirstParagraph().title
-	content := file.FirstParagraph().content
+
+	title := "# " + files[0].FirstParagraph().title
+	content := files[0].FirstParagraph().content
 
 	assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
 	assert.Equal(t, "# Root Level Markdown", title)
@@ -39,9 +38,8 @@ func TestGetFirstParagraph(t *testing.T) {
 
 func TestGetFirstParagraphInEveryFile(t *testing.T) {
 	files := findFiles(TESTDIR, []string{})
-	var file RawMarkdown
-	for _, f := range files {
-		file.path = f
+
+	for _, file := range files {
 		content := file.FirstParagraph().content
 		if len(content) > 0 {
 			assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
@@ -198,6 +196,11 @@ func TestCalculateDepth(t *testing.T) {
 
 	file.path = TESTDIR + "/README.md"
 	assert.Equal(t, 1, file.calculatePathDepth())
+
+	absPath, _ := filepath.Abs(TESTDIR)
+	fmt.Println(absPath)
+	file.path = absPath + "/README.md"
+	// assert.Equal(t, 1, file.calculatePathDepth())
 	file.path = TESTDIR + "/folder1/README.md"
 	assert.Equal(t, 2, file.calculatePathDepth())
 	file.path = TESTDIR + "/folder1/folder11/README.md"
