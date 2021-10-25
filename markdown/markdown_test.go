@@ -59,8 +59,7 @@ func TestCreateSingleLineFile(t *testing.T) {
 	createMDFile(filePath, contentString, false)
 	assert.FileExists(t, filePath)
 
-	var file RawMarkdown
-	file.path = filePath
+	file := newMarkdownFile(filePath)
 	content := file.readFile()
 
 	assert.Equal(t, contentString, string(content))
@@ -75,8 +74,7 @@ func TestCreateMultiLineFile(t *testing.T) {
 	createMDFile(filePath, contentString, false)
 	assert.FileExists(t, filePath)
 
-	var file RawMarkdown
-	file.path = filePath
+	file := newMarkdownFile(filePath)
 	content := file.readFile()
 
 	assert.Equal(t, contentString, string(content))
@@ -84,8 +82,7 @@ func TestCreateMultiLineFile(t *testing.T) {
 }
 
 func TestCompareFinalFilePlainContent(t *testing.T) {
-	var file RawMarkdown
-	file.path = TESTDIR + "/final-file-without-metadata.mock"
+	file := newMarkdownFile(TESTDIR + "/final-file-without-metadata.mock")
 	mockFile := file.readFile()
 
 	contentNode, contentByte := buildIndexContent(TESTDIR, []string{})
@@ -94,8 +91,8 @@ func TestCompareFinalFilePlainContent(t *testing.T) {
 }
 
 func TestCompareFinalFileHTMLContent(t *testing.T) {
-	var file RawMarkdown
-	file.path = TESTDIR + "/final-file-html.mock"
+	file := newMarkdownFile(TESTDIR + "/final-file-html.mock")
+
 	mockFile := file.readFile()
 
 	contentNode, contentByte := buildIndexContent(TESTDIR, []string{})
@@ -104,8 +101,8 @@ func TestCompareFinalFileHTMLContent(t *testing.T) {
 }
 
 func TestCompareFinalFilePlainContentWithIgnore(t *testing.T) {
-	var file RawMarkdown
-	file.path = TESTDIR + "/final-file-ignored.mock"
+	file := newMarkdownFile(TESTDIR + "/final-file-ignored.mock")
+
 	mockFile := file.readFile()
 
 	contentNode, contentByte := buildIndexContent(TESTDIR, []string{"folder2"})
@@ -116,22 +113,20 @@ func TestCompareFinalFilePlainContentWithIgnore(t *testing.T) {
 func TestCompareFinalFileHTMLContentWithIgnore(t *testing.T) {
 	contentNode, contentByte := buildIndexContent(TESTDIR, []string{"folder2"})
 
-	var file RawMarkdown
-	file.path = TESTDIR + "/final-file-html-ignored.mock"
+	file := newMarkdownFile(TESTDIR + "/final-file-html-ignored.mock")
 	mockFile := file.readFile()
 
 	assert.Equal(t, string(mockFile), contentNode.renderHTMLMarkdown(contentByte))
 }
 
 func TestCompareFinalFilePlainBytes(t *testing.T) {
-	var finalFile, mockFile RawMarkdown
-	finalFile.path = "/tmp/test-toc.md"
+	finalFile := newMarkdownFile("/tmp/test-toc.md")
 
 	contentNode, contentString := buildIndexContent(TESTDIR, []string{})
 	createMDFile(finalFile.path, contentNode.renderPlainMarkdown(contentString), false)
 	fileGenerated := finalFile.readFile()
 
-	mockFile.path = TESTDIR + "/final-file-without-metadata.mock"
+	mockFile := newMarkdownFile(TESTDIR + "/final-file-without-metadata.mock")
 	mock := mockFile.readFile()
 	assert.True(t, bytes.Equal(fileGenerated, mock))
 
@@ -140,13 +135,12 @@ func TestCompareFinalFilePlainBytes(t *testing.T) {
 }
 
 func TestFinalFileIdempotency(t *testing.T) {
-	var finalFile, mockFile RawMarkdown
-	finalFile.path = TESTDIR + "/" + "test-file.md"
+	finalFile := newMarkdownFile(TESTDIR + "/" + "test-file.md")
 	contentNode, contentString := buildIndexContent(TESTDIR, []string{})
 	createMDFile(finalFile.path, contentNode.renderPlainMarkdown(contentString), true)
 	fileGenerated := finalFile.readFile()
 
-	mockFile.path = TESTDIR + "/final-file-with-metadata.mock"
+	mockFile := newMarkdownFile(TESTDIR + "/final-file-with-metadata.mock")
 	mock := mockFile.readFile()
 	assert.True(t, bytes.Equal(fileGenerated, mock))
 
@@ -160,14 +154,13 @@ func TestFinalFileIdempotency(t *testing.T) {
 }
 
 func TestCompareFinalFileHTMLBytes(t *testing.T) {
-	var finalFile, mockFile RawMarkdown
-	finalFile.path = "/tmp/test-toc.md"
+	finalFile := newMarkdownFile("/tmp/test-toc.md")
 
 	contentNode, contentByte := buildIndexContent(TESTDIR, []string{})
 	createMDFile(finalFile.path, contentNode.renderHTMLMarkdown(contentByte), false)
 	fileGenerated := finalFile.readFile()
 
-	mockFile.path = TESTDIR + "/final-file-html.mock"
+	mockFile := newMarkdownFile(TESTDIR + "/final-file-html.mock")
 	mockFileContent := mockFile.readFile()
 	assert.True(t, bytes.Equal(fileGenerated, mockFileContent))
 
@@ -175,8 +168,7 @@ func TestCompareFinalFileHTMLBytes(t *testing.T) {
 }
 
 func TestFilterAbstractHeading(t *testing.T) {
-	var file RawMarkdown
-	file.path = TESTDIR + "/README.md"
+	file := newMarkdownFile(TESTDIR + "/README.md")
 	content := file.FilterHeadingAbstract("Another title")
 	assert.NotEmpty(t, content)
 
@@ -192,9 +184,7 @@ func TestContainsHelper(t *testing.T) {
 }
 
 func TestCalculateDepth(t *testing.T) {
-	var file RawMarkdown
-
-	file.path = TESTDIR + "/README.md"
+	file := newMarkdownFile(TESTDIR + "/README.md")
 	assert.Equal(t, 1, file.calculatePathDepth())
 
 	absPath, _ := filepath.Abs(TESTDIR)
@@ -211,13 +201,13 @@ func TestCalculateDepth(t *testing.T) {
 }
 
 func TestBuildTableOfContents(t *testing.T) {
-	var doc, mock RawMarkdown
+	var doc RawMarkdown
 	doc.content = []byte("# Title\nContent")
 
 	tocNode, tocByte := doc.buildTableOfContents()
 
 	render := tocNode.renderHTMLMarkdown(tocByte)
-	mock.path = TESTDIR + "/table-of-content.mock"
+	mock := newMarkdownFile(TESTDIR + "/table-of-content.mock")
 	mockToc := mock.readFile()
 
 	assert.Equal(t, string(mockToc), render)
@@ -228,12 +218,10 @@ func TestCobraExecutionFlow(t *testing.T) {
 	output := "my-test-file.md"
 	Execute(output, directory)
 
-	var finalFile RawMarkdown
-	finalFile.path = directory + "/" + output
+	finalFile := newMarkdownFile(directory + "/" + output)
 	fileGenerated := finalFile.readFile()
 
-	var mockFile RawMarkdown
-	mockFile.path = TESTDIR + "/final-file-with-metadata.mock"
+	mockFile := newMarkdownFile(TESTDIR + "/final-file-with-metadata.mock")
 	mock := mockFile.readFile()
 
 	assert.True(t, bytes.Equal(fileGenerated, mock))
@@ -243,25 +231,27 @@ func TestCobraExecutionFlow(t *testing.T) {
 }
 
 func TestFileWithoutMetadata(t *testing.T) {
-	var file RawMarkdown
-	file.path = TESTDIR + "/README.md"
+	file := newMarkdownFile(TESTDIR + "/README.md")
 
 	assert.False(t, file.isFileAutoGenerated())
 }
 func TestFileWittMetadata(t *testing.T) {
-	var file RawMarkdown
-	file.path = TESTDIR + "/final-file-with-metadata.mock"
+	file := newMarkdownFile(TESTDIR + "/final-file-with-metadata.mock")
 
 	assert.True(t, file.isFileAutoGenerated())
 }
 
 func TestAddMetadataInFile(t *testing.T) {
-	var file, mock RawMarkdown
+	var file RawMarkdown
 	file.content = []byte("# Root Level Markdown\n\nThis file should be completely ignored because it has metadata Title == markdown-index\n")
 
 	file.addMetadata()
 
-	mock.path = TESTDIR + "/file-with-metadata.md"
+	mock := newMarkdownFile(TESTDIR + "/file-with-metadata.md")
 
 	assert.Equal(t, string(mock.readFile()), string(file.content))
+}
+
+func TestNewMarkdownFile(t *testing.T) {
+	assert.IsType(t, &RawMarkdown{}, newMarkdownFile("/tmp"))
 }
