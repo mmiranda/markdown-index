@@ -260,3 +260,10 @@ func TestNewMarkdownFile(t *testing.T) {
 	assert.IsType(t, &RawMarkdown{}, file)
 	assert.Equal(t, "dir", file.basedir)
 }
+
+func TestFileRealPath(t *testing.T) {
+
+	assert.Equal(t, "./test/file.md", getFileRealPath(TESTDIR, TESTDIR+"/test/file.md"))
+	assert.Equal(t, "./test/test2/file.md", getFileRealPath(TESTDIR, TESTDIR+"/test/test2/file.md"))
+	assert.Equal(t, "./test/file.md", getFileRealPath(".", "test/file.md"))
+}

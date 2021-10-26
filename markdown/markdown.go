@@ -76,10 +76,19 @@ func newMarkdownFile(rootDirectory, path string) *RawMarkdown {
 	var file RawMarkdown
 	file.path = path
 	file.basedir = filepath.Base(filepath.Dir(file.path))
-	file.realPath = strings.ReplaceAll(file.path, rootDirectory, "")
+
+	file.realPath = getFileRealPath(rootDirectory, path)
+
 	file.content, _ = file.readFile()
 
 	return &file
+}
+
+func getFileRealPath(rootDirectory, path string) string {
+	if rootDirectory == "." {
+		return rootDirectory + "/" + path
+	}
+	return "." + strings.ReplaceAll(path, rootDirectory, "")
 }
 
 // contains verify if a string is inside a set of strings
@@ -249,7 +258,7 @@ func buildIndexContent(rootDirectory string, ignoreDirectories []string) (AstNod
 
 		heading.AppendChild(heading, ast.NewString([]byte(file.FirstParagraph().title)))
 
-		paragraphContent := file.FirstParagraph().content + "\n\n[Read more on the original file...](." + file.realPath + ")"
+		paragraphContent := file.FirstParagraph().content + "\n\n[Read more on the original file...](" + file.realPath + ")"
 		paragraph.AppendChild(paragraph, ast.NewString([]byte(paragraphContent)))
 
 		finalDoc.AppendChild(finalDoc, heading)
