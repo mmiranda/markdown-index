@@ -1,4 +1,8 @@
-[![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org) [![codecov](https://codecov.io/gh/mmiranda/markdown-index/branch/main/graph/badge.svg?token=3B0LZEZ6XN)](https://codecov.io/gh/mmiranda/markdown-index)
+[![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org)
+[![codecov](https://codecov.io/gh/mmiranda/markdown-index/branch/main/graph/badge.svg?token=3B0LZEZ6XN)](https://codecov.io/gh/mmiranda/markdown-index)
+[![https://goreportcard.com/report/github.com/mmiranda/markdown-index](https://goreportcard.com/badge/github.com/mmiranda/markdown-index)](https://goreportcard.com/report/github.com/mmiranda/markdown-index)
+![[Test](https://github.com/mmiranda/markdown-index/actions/workflows/test-coverage.yml)](https://github.com/mmiranda/markdown-index/actions/workflows/test-coverage.yml/badge.svg)
+
 
 # markdown index
 Markdown-index is a library to help you generate a global index for multiple markdown files recursively in a directory, containing a summary of every file found.
