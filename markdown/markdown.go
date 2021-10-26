@@ -77,6 +77,7 @@ func newMarkdownFile(rootDirectory, path string) *RawMarkdown {
 	file.path = path
 	file.basedir = filepath.Base(filepath.Dir(file.path))
 	file.realPath = strings.ReplaceAll(file.path, rootDirectory, "")
+	file.content, _ = file.readFile()
 
 	return &file
 }
@@ -101,21 +102,15 @@ func (md RawMarkdown) calculatePathDepth() int {
 }
 
 // readFile Reads a markdown file and return its content
-func (file RawMarkdown) readFile() []byte {
+func (file RawMarkdown) readFile() ([]byte, error) {
 	content, err := ioutil.ReadFile(file.path)
 
-	if err != nil {
-		log.Fatalf("Error opening file %s!", file.path)
-	}
-
-	return content
+	return content, err
 
 }
 
 // FirstParagraph gets the text of first paragraph in a markdown file
 func (md RawMarkdown) getMetadata() map[string]interface{} {
-	source := md.readFile()
-
 	var buf bytes.Buffer
 	markdown := goldmark.New(
 		goldmark.WithExtensions(
@@ -124,7 +119,7 @@ func (md RawMarkdown) getMetadata() map[string]interface{} {
 	)
 
 	context := parser.NewContext()
-	if err := markdown.Convert([]byte(source), &buf, parser.WithContext(context)); err != nil {
+	if err := markdown.Convert([]byte(md.content), &buf, parser.WithContext(context)); err != nil {
 		panic(err)
 	}
 
@@ -171,7 +166,6 @@ func (md *RawMarkdown) FirstParagraph() AbstractParagraph {
 }
 
 func (md *RawMarkdown) ParseDocument() (ast.Node, []byte) {
-	source := md.readFile()
 	gm := goldmark.New(
 		goldmark.WithParserOptions(
 			parser.WithASTTransformers(),
@@ -181,7 +175,7 @@ func (md *RawMarkdown) ParseDocument() (ast.Node, []byte) {
 		),
 	)
 
-	return gm.Parser().Parse(text.NewReader(source)), source
+	return gm.Parser().Parse(text.NewReader(md.content)), md.content
 }
 
 func (md *RawMarkdown) FilterHeadingAbstract(title string) AbstractParagraph {
