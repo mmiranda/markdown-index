@@ -1,34 +1,34 @@
 # Table of Contents
 * [Root Level Markdown](#root-level-markdown)
-  * [Level 1 Markdown](#level-1-markdown)
-    * [Level 1.1 Markdown](#level-11-markdown)
+* [Level 1 Markdown](#level-1-markdown)
+  * [Level 1.1 Markdown](#level-11-markdown)
 * [this file has a single line](#this-file-has-a-single-line)
-  * [Abstract](#abstract)
+* [Abstract](#abstract)
 
 # Root Level Markdown {#root-level-markdown}
 
 This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
-[Read more on the original file...](test/README.md)
+[Read more on the original file...](./README.md)
 
-## Level 1 Markdown {#level-1-markdown}
-
-This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
-
-[Read more on the original file...](test/folder1/README.md)
-
-### Level 1.1 Markdown {#level-11-markdown}
+# Level 1 Markdown {#level-1-markdown}
 
 This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
-[Read more on the original file...](test/folder1/folder11/README.md)
+[Read more on the original file...](./folder1/README.md)
+
+## Level 1.1 Markdown {#level-11-markdown}
+
+This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
+
+[Read more on the original file...](./folder1/folder11/README.md)
 
 # this file has a single line {#this-file-has-a-single-line}
 
-[Read more on the original file...](test/single-line.md)
+[Read more on the original file...](./single-line.md)
 
-## Abstract {#abstract}
+# Abstract {#abstract}
 
 This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.
 
-[Read more on the original file...](test/with-abstract/README.md)
+[Read more on the original file...](./with-abstract/README.md)
