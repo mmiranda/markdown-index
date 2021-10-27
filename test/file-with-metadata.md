@@ -1,5 +1,5 @@
 ---
-Title: markdown-index
+generated-by: markdown-index
 ---
 # Root Level Markdown
 
