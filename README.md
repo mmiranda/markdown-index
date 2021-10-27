@@ -7,6 +7,7 @@
 # markdown index
 Markdown-index is a library to help you generate a global index for multiple markdown files recursively in a directory, containing a summary of every file found.
 
+![](show.gif)
 
 ## Installation
 
