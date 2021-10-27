@@ -2,6 +2,7 @@ package markdown
 
 import (
 	"bytes"
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -11,6 +12,10 @@ import (
 const (
 	TESTDIR = "../test"
 )
+
+func init() {
+	searchHeading = "Abstract"
+}
 
 func TestShouldFindReadme(t *testing.T) {
 	files := findFiles(TESTDIR, []string{})
@@ -25,11 +30,11 @@ func TestShouldReadFirstFileContent(t *testing.T) {
 	assert.Contains(t, string(content), "# Root Level Markdown")
 }
 
-func TestGetFirstParagraph(t *testing.T) {
+func TestGetFirstParagraph2(t *testing.T) {
 	files := findFiles(TESTDIR, []string{})
 
-	title := "# " + files[0].FirstParagraph().title
-	content := files[0].FirstParagraph().content
+	title := "# " + files[0].getFirstParagraph().title
+	content := files[0].getFirstParagraph().content
 
 	assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
 	assert.Equal(t, "# Root Level Markdown", title)
@@ -39,7 +44,7 @@ func TestGetFirstParagraphInEveryFile(t *testing.T) {
 	files := findFiles(TESTDIR, []string{})
 
 	for _, file := range files {
-		content := file.FirstParagraph().content
+		content := file.getFirstParagraph().content
 		if len(content) > 0 {
 			assert.Equal(t, "This is a sample paragraph text for test purpose only. This paragraph will be used as an abstract on the global TOC.", content)
 		} else {
@@ -85,6 +90,9 @@ func TestCompareFinalFilePlainContent(t *testing.T) {
 	mockFile, _ := file.readFile()
 
 	contentNode, contentByte := buildIndexContent(TESTDIR, []string{})
+	// fmt.Println(string(mockFile))
+	// fmt.Println("------")
+	// fmt.Println(contentNode.renderPlainMarkdown(contentByte))
 
 	assert.Equal(t, string(mockFile), contentNode.renderPlainMarkdown(contentByte))
 }
@@ -169,11 +177,15 @@ func TestCompareFinalFileHTMLBytes(t *testing.T) {
 
 func TestFilterAbstractHeading(t *testing.T) {
 	file := newMarkdownFile(TESTDIR, TESTDIR+"/README.md")
-	content := file.filterHeadingAbstract("Another title")
+	searchHeading = "Another title"
+	content := file.getFirstParagraph()
 	assert.NotEmpty(t, content)
+	assert.Equal(t, "Another title", content.title)
 
-	content = file.filterHeadingAbstract("Unexistent title heading")
-	assert.Empty(t, content)
+	searchHeading = "Unexistent title heading"
+	content = file.getFirstParagraph()
+	assert.NotEmpty(t, content)
+	assert.Equal(t, "Root Level Markdown", content.title)
 }
 
 func TestContainsHelper(t *testing.T) {
@@ -217,6 +229,8 @@ func TestBuildTableOfContents(t *testing.T) {
 }
 
 func TestCobraExecutionFlow(t *testing.T) {
+	searchHeading = "Abstract"
+	fmt.Println(searchHeading)
 	directory := TESTDIR
 	output := "my-test-file.md"
 	Execute(output, directory)
@@ -228,6 +242,7 @@ func TestCobraExecutionFlow(t *testing.T) {
 	mock := mockFile.content
 
 	assert.True(t, bytes.Equal(fileGenerated, mock))
+	assert.Equal(t, string(mock), string(fileGenerated))
 	assert.FileExists(t, directory+"/"+output)
 
 	DeleteFile(directory + "/" + output)
