@@ -1,4 +1,4 @@
-name: Test and coverage
+name: Tests
 on: [push, pull_request]
 jobs:
   build:
