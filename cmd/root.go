@@ -16,8 +16,8 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "markdown-index",
 	Short: "Generate summary index for your Markdown files",
-	Long: `markdown-index iterates through a given directory, 
-reads all markdown files recursively and generate for you 
+	Long: `markdown-index iterates through a given directory,
+reads all markdown files recursively and generate for you
 a index file with the summary of each file found.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		markdown.Execute(output, directory)
@@ -29,7 +29,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number",
 	Long:  `Print the version numbe`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("v0.1-0-alpha")
+		fmt.Println("v0.1-0-beta")
 	},
 }
 
