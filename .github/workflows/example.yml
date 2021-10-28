@@ -1,0 +1,31 @@
+# This is a live example of using the markdown-index in your Github Actions.
+# Simply copy it to your own repo and make sure you change the working-directory 
+name: live-example
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  markdown-index:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Generate Markdown Index
+        id: markdown-index
+        run: docker run --rm --volume "$(pwd):/data" ghcr.io/mmiranda/markdown-index:latest --output live-example.md
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Automated markdown-index Documentation
+          file_pattern: "**/*.md"
