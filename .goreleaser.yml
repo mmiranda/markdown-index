@@ -7,7 +7,7 @@ builds:
   - env:
       - CGO_ENABLED=0
     ldflags: 
-      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser'
+      - '-s -w -X github.com/mmiranda/markdown-index/cmd.version={{.Version}} -X github.com/mmiranda/markdown-index/cmd.commit={{.Commit}} -X github.com/mmiranda/markdown-index/cmd.date={{.Date}}'
     goos:
       - linux
       - windows
