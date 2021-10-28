@@ -1,0 +1,5 @@
+FROM scratch
+VOLUME /data
+ENTRYPOINT ["/markdown-index", "--directory", "/data"]
+CMD ["--directory", "/data"]
+COPY markdown-index /
