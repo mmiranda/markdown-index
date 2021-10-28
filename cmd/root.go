@@ -5,6 +5,7 @@ import (
 
 	"github.com/mmiranda/markdown-index/markdown"
 	"github.com/spf13/cobra"
+	goVersion "go.hein.dev/go-version"
 )
 
 var (
@@ -24,20 +25,31 @@ a index file with the summary of each file found.`,
 	},
 }
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print the version number",
-	Long:  `Print the version numbe`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("v0.1-0-beta")
-	},
-}
+var (
+	shortened     = false
+	version       = "dev"
+	commit        = "none"
+	date          = "unknown"
+	versionOutput = "json"
+	versionCmd    = &cobra.Command{
+		Use:   "version",
+		Short: "Version will output the current build information",
+		Long:  ``,
+		Run: func(_ *cobra.Command, _ []string) {
+			resp := goVersion.FuncWithOutput(shortened, version, commit, date, versionOutput)
+			fmt.Print(resp)
+			return
+		},
+	}
+)
 
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
 }
 
 func init() {
+	versionCmd.Flags().BoolVarP(&shortened, "short", "s", false, "Print just the version number.")
+	versionCmd.Flags().StringVarP(&output, "output", "o", "json", "Output format. One of 'yaml' or 'json'.")
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
