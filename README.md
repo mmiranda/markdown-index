@@ -38,6 +38,11 @@ docker run --rm -it -v /path/to/root/md/files:/data ghcr.io/mmiranda/markdown-in
 
 After running the command, a new markdown file will be created containing a summary of every other file found.
 
+## Github Actions
+Yes, you can integrate this tool into your pipeline.
+
+Check the [live-example](.github/workflows/example.yml) for GH Actions and copy it to your own repo!
+
 ## Contributing
 Contributions, issues, and feature requests are welcome!
 
