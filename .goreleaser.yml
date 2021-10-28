@@ -30,6 +30,20 @@ changelog:
       - '^docs:'
       - '^test:'
 
+dockers:
+  -
+    image_templates:
+      - "ghcr.io/mmiranda/markdown-index:latest"
+      - "ghcr.io/mmiranda/markdown-index:{{ .Tag }}"
+    dockerfile: Dockerfile.goreleaser
+    build_flag_templates:
+    - "--label=org.opencontainers.image.source=https://github.com/mmiranda/markdown-index"
+    - "--label=org.opencontainers.image.description=Tool to generate a global Markdown Summary Index based on other markdown files"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"    
+
 # Publish on Homebrew Tap
 brews:
   -
