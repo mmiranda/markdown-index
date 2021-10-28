@@ -169,9 +169,7 @@ func (md *rawMarkdown) getFirstParagraph() abstractParagraph {
 		var err error
 		if n.Kind().String() != "Heading" {
 			return s, err
-		}
-
-		if n.Kind().String() == "Heading" {
+		} else if string(n.Text(source)) != "Table of Contents" {
 			rawContent := ""
 			// Check prevents single heading document
 			if doc.FirstChild() != doc.LastChild() {

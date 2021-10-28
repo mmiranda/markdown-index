@@ -30,7 +30,7 @@ func TestShouldReadFirstFileContent(t *testing.T) {
 	assert.Contains(t, string(content), "# Root Level Markdown")
 }
 
-func TestGetFirstParagraph2(t *testing.T) {
+func TestGetFirstParagraph(t *testing.T) {
 	files := findFiles(TESTDIR, []string{})
 
 	title := "# " + files[0].getFirstParagraph().title
