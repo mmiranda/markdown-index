@@ -6,7 +6,7 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
-    ldflags: 
+    ldflags:
       - '-s -w -X github.com/mmiranda/markdown-index/cmd.version={{.Version}} -X github.com/mmiranda/markdown-index/cmd.commit={{.Commit}} -X github.com/mmiranda/markdown-index/cmd.date={{.Date}}'
     goos:
       - linux
@@ -42,7 +42,7 @@ dockers:
     - "--label=org.opencontainers.image.created={{.Date}}"
     - "--label=org.opencontainers.image.title={{.ProjectName}}"
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-    - "--label=org.opencontainers.image.version={{.Version}}"    
+    - "--label=org.opencontainers.image.version={{.Version}}"
 
 # Publish on Homebrew Tap
 brews:
@@ -50,7 +50,7 @@ brews:
     name: markdown-index
     tap:
       owner: mmiranda
-      name: homebrew-mdindex
+      name: homebrew-apps
       branch: main
 
     commit_author:
