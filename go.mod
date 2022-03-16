@@ -4,6 +4,8 @@ go 1.17
 
 require github.com/yuin/goldmark v1.4.1
 
+require golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+
 require (
 	github.com/Kunde21/markdownfmt/v2 v2.1.0
 	github.com/abhinav/goldmark-toc v0.2.0
@@ -29,4 +31,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-require sigs.k8s.io/yaml v1.1.0 // indirect
+require (
+	github.com/sirupsen/logrus v1.8.1
+	sigs.k8s.io/yaml v1.1.0 // indirect
+)
