@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"io/ioutil"
-	"log"
+
+	// "log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	mdrender "github.com/Kunde21/markdownfmt/v2/markdown"
 	toc "github.com/abhinav/goldmark-toc"
+	log "github.com/sirupsen/logrus"
 	"github.com/yuin/goldmark"
 	meta "github.com/yuin/goldmark-meta"
 	"github.com/yuin/goldmark/ast"
@@ -21,6 +23,9 @@ import (
 var (
 	ignoreDirectories []string
 	searchHeading     string
+)
+var (
+	LogLevel = log.WarnLevel
 )
 
 //abstractParagraph represents the paragraph which will be used as abstract.
@@ -42,6 +47,8 @@ type astNode struct {
 
 // Execute orchestrates the execution of the library
 func Execute(output string, rootDirectory string) {
+
+	log.SetLevel(LogLevel)
 
 	// Add Cobra CLI later
 	contentNode, contentByte := buildIndexContent(rootDirectory, ignoreDirectories)
@@ -262,6 +269,7 @@ func buildIndexContent(rootDirectory string, ignoreDirectories []string) (astNod
 
 	for _, file := range files {
 
+		log.Debugf("Reading file: %s", file.path)
 		heading := ast.NewHeading(file.calculatePathDepth())
 
 		paragraph := ast.NewParagraph()

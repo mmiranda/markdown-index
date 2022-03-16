@@ -3,14 +3,16 @@ package cmd
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/mmiranda/markdown-index/markdown"
 	"github.com/spf13/cobra"
 	goVersion "go.hein.dev/go-version"
 )
 
 var (
-	directory, output, skipDirectory, useHeading string
-	// maxDepth          int
+	directory, output, skip, useHeading string
+	debug                               bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -21,6 +23,11 @@ var rootCmd = &cobra.Command{
 reads all markdown files recursively and generate for you
 a index file with the summary of each file found.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		if debug {
+			markdown.LogLevel = log.DebugLevel
+		}
+
 		markdown.Execute(output, directory)
 	},
 }
@@ -55,8 +62,9 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&directory, "directory", ".", "Directory to search markdown files recursively")
 	rootCmd.PersistentFlags().StringVar(&output, "output", "markdown-index.md", "Final markdown file to be created")
-	rootCmd.PersistentFlags().StringVar(&skipDirectory, "skipDirectory", "", "Skip directory in the recursive walk")
+	rootCmd.PersistentFlags().StringVar(&skip, "skip", "s", "Skip directory in the recursive walk")
 	rootCmd.PersistentFlags().StringVar(&useHeading, "heading", "", "Use this Heading inside the markdown file as summary of the file")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Enable Debug Mode.")
 	// rootCmd.PersistentFlags().StringVar(&output, "maxDepth", "5", "Maximum depth level to look for files")
 
 }
