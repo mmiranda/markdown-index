@@ -178,8 +178,9 @@ func (md *rawMarkdown) getFirstParagraph() abstractParagraph {
 			return s, err
 		} else if string(n.Text(source)) != "Table of Contents" {
 			rawContent := ""
-			// Check prevents single heading document
-			if doc.FirstChild() != doc.LastChild() {
+
+			// Check prevents single heading document and headings with empty text
+			if doc.FirstChild() != doc.LastChild() && n.NextSibling() != nil {
 				rawContent = string(n.NextSibling().Text(source))
 			}
 
