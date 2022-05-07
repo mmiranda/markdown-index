@@ -1,11 +1,10 @@
 # This is a live example of using the markdown-index in your Github Actions.
-# Simply copy it to your own repo and make sure you change the working-directory 
+# Simply copy it to your own repo and make sure you change the working-directory
 name: live-example
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+  schedule:
+    # Runs every monday only for example. For real example, change it to push events
+    - cron: '0 0 * * 1'
 jobs:
   markdown-index:
     runs-on: ubuntu-latest
