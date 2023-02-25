@@ -4,7 +4,7 @@ go 1.17
 
 require github.com/yuin/goldmark v1.4.1
 
-require golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+require golang.org/x/sys v0.1.0 // indirect
 
 require (
 	github.com/Kunde21/markdownfmt/v2 v2.1.0
